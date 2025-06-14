@@ -15,30 +15,69 @@ serve(async (req) => {
   }
 
   try {
-    const { documentType, prompt, country, university } = await req.json();
+  const { documentType, prompt, country, university } = await req.json();
 
     console.log('Generating document with Gemini API:', { documentType, country, university });
 
-    // Create the system prompt based on document type
-    const systemPrompt = documentType === 'sop' 
-      ? `You are an expert academic writer specializing in Statement of Purpose (SOP) documents for international students. Generate a professional, compelling, and personalized SOP based on the provided information. The SOP should be well-structured with clear paragraphs covering: introduction and motivation, academic background, professional experience (if any), why this specific program/university, future goals, and conclusion. Keep it within 800-1000 words.`
-      : `You are an expert career counselor and professional writer specializing in cover letters for job applications. Generate a professional, compelling, and tailored cover letter based on the provided information. The cover letter should be well-structured with clear paragraphs covering: opening statement, relevant qualifications and experience, why you're interested in this role/company, and a strong closing. Keep it concise and impactful, within 300-500 words.`;
+    // Generate a structured prompt with HTML formatting instructions
+    const generatePrompt = (documentType: string, country: string, university: string) => {
+      if (documentType === 'sop') {
+        return `Generate a comprehensive Statement of Purpose (SOP) for studying in ${university}, ${country}. 
 
-    const userPrompt = documentType === 'sop' 
-      ? `Please write a Statement of Purpose for:
-        Country: ${country || 'Not specified'}
-        University: ${university || 'Not specified'}
-        
-        Additional details: ${prompt}
-        
-        Make it personal, specific, and compelling while maintaining a professional tone.`
-      : `Please write a cover letter for:
-        Location: ${country || 'Not specified'}
-        Company/Organization: ${university || 'Not specified'}
-        
-        Job details and qualifications: ${prompt}
-        
-        Make it professional, specific, and compelling while highlighting relevant qualifications.`;
+Structure the response with proper formatting using HTML tags:
+- Use <h2> for main section headings
+- Use <h3> for subsection headings  
+- Use <p> for paragraphs
+- Use <strong> for emphasis/bold text
+- Use <ul> and <li> for bullet points where appropriate
+
+Include these sections:
+1. **Introduction** - Personal background and motivation
+2. **Academic Background** - Educational qualifications and achievements
+3. **Professional Experience** - Work experience and skills (if applicable)
+4. **Why This University** - Specific reasons for choosing ${university}
+5. **Why ${country}** - Reasons for choosing ${country} for studies
+6. **Career Goals** - Short-term and long-term career objectives
+7. **Conclusion** - Summary and commitment statement
+
+Make it professional, personalized, and compelling. Length should be 800-1000 words.
+Return ONLY the formatted HTML content without any markdown backticks or additional text.`;
+      } else if (documentType === 'cover_letter') {
+        return `Generate a professional Cover Letter for a job application or university application in ${country}. 
+
+Structure the response with proper formatting using HTML tags:
+- Use <h2> for the main heading "Cover Letter"
+- Use <p> for paragraphs
+- Use <strong> for emphasis/bold text
+- Use proper spacing between sections
+
+Include these sections:
+1. **Header** - Date and recipient information
+2. **Opening** - Professional greeting and purpose
+3. **Body Paragraphs** - 
+   - Your background and qualifications
+   - Why you're interested in the opportunity
+   - What you can contribute
+4. **Closing** - Professional closing and call to action
+5. **Signature** - Professional sign-off
+
+Make it professional and compelling. Length should be 300-500 words.
+Return ONLY the formatted HTML content without any markdown backticks or additional text.`;
+      } else {
+        return `Generate a professional ${documentType} document for ${university}, ${country}. 
+      
+Use proper HTML formatting with headings, paragraphs, and emphasis where appropriate.
+Make it professional and well-structured.
+Return ONLY the formatted HTML content without any markdown backticks or additional text.`;
+      }
+    };
+
+    const fullPrompt = `${generatePrompt(documentType, country || 'Not specified', university || 'Not specified')}
+
+Additional information provided by the user:
+${prompt}
+
+Important: Format the entire response as valid HTML that can be directly embedded in a webpage. Do not include any markdown formatting, only HTML.`;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
@@ -48,9 +87,9 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: [
           {
-            parts: [
+          parts: [
               {
-                text: `${systemPrompt}\n\n${userPrompt}`
+                text: fullPrompt
               }
             ]
           }
