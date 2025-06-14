@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, Check, X } from 'lucide-react';
+import { Upload, FileText, Check, X, Trash2 } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -176,6 +176,54 @@ const Documents = () => {
     }
   };
 
+  const deleteDocument = async (documentId: string, fileUrl: string | null) => {
+    try {
+      // Delete from database first
+      const { error: dbError } = await supabase
+        .from('documents')
+        .delete()
+        .eq('id', documentId);
+
+      if (dbError) throw dbError;
+
+      // Delete from storage if file_url exists
+      if (fileUrl) {
+        try {
+          // Extract file path from URL
+          const url = new URL(fileUrl);
+          const filePath = url.pathname.split('/storage/v1/object/public/documents/')[1];
+          
+          if (filePath) {
+            const { error: storageError } = await supabase.storage
+              .from('documents')
+              .remove([filePath]);
+            
+            if (storageError) {
+              console.warn('Storage deletion warning:', storageError);
+            }
+          }
+        } catch (urlError) {
+          console.warn('Could not parse file URL for storage deletion:', urlError);
+        }
+      }
+
+      // Update local state
+      setDocuments(docs => docs.filter(doc => doc.id !== documentId));
+
+      toast({
+        title: "Success",
+        description: "Document deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -307,15 +355,25 @@ const Documents = () => {
                         onCheckedChange={() => toggleCompletion(doc.id, doc.is_completed)}
                       />
                     </div>
-                    {doc.file_url && (
+                    <div className="flex items-center gap-2">
+                      {doc.file_url && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(doc.file_url!, '_blank')}
+                        >
+                          View
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(doc.file_url!, '_blank')}
+                        onClick={() => deleteDocument(doc.id, doc.file_url)}
+                        className="text-destructive hover:text-destructive"
                       >
-                        View
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
+                    </div>
                   </div>
                 </div>
               ))}
