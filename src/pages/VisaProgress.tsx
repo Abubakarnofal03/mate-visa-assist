@@ -172,7 +172,7 @@ const VisaProgress = () => {
         <h2 className="text-xl font-semibold">Application Steps</h2>
         <div className="space-y-4">
           {progressSteps.map((step, index) => {
-            const isCompleted = progressData?.[step.key] || false;
+            const isCompleted = Boolean(progressData?.[step.key]) || false;
             const isUpdating = updating === step.key;
 
             return (

@@ -84,65 +84,40 @@ const SOP = () => {
     setGenerating(true);
 
     try {
-      // This is a placeholder for AI generation
-      // In a real implementation, you would call your AI service here
-      const placeholderText = `This is a placeholder ${documentType === 'sop' ? 'Statement of Purpose' : 'Cover Letter'} generated based on your input:
+      // Call Gemini API through Supabase Edge Function
+      const { data, error: functionError } = await supabase.functions.invoke('generate-with-gemini', {
+        body: {
+          documentType,
+          prompt: promptInput,
+          country: country || null,
+          university: university || null,
+        },
+      });
 
-Country: ${country || 'Not specified'}
-University: ${university || 'Not specified'}
+      if (functionError) {
+        console.error('Edge function error:', functionError);
+        throw new Error(functionError.message || 'Failed to generate document');
+      }
 
-Your Input: ${promptInput}
+      if (!data?.generatedText) {
+        throw new Error('No content generated');
+      }
 
-Generated Content:
-${documentType === 'sop' 
-  ? `I am writing to express my strong interest in pursuing [Program Name] at ${university || 'your esteemed university'} in ${country || 'your country'}. With my academic background and professional experience, I am confident that this program will help me achieve my career goals.
-
-Throughout my academic journey, I have developed a passion for [field of study]. My undergraduate studies in [field] have provided me with a solid foundation in [relevant skills/knowledge]. I have consistently maintained excellent academic performance, which demonstrates my commitment to learning and excellence.
-
-My professional experience includes [relevant experience], where I gained valuable insights into [industry/field]. This experience has reinforced my decision to pursue advanced studies in this field and has given me a clear understanding of the challenges and opportunities that lie ahead.
-
-I am particularly drawn to ${university || 'your university'} because of its reputation for excellence in [program/field]. The faculty's expertise in [specific areas] and the university's state-of-the-art facilities make it the ideal place for me to further my education and research interests.
-
-Upon completion of my studies, I plan to return to my home country and contribute to [relevant field/industry]. I believe that the knowledge and skills I will gain from this program will enable me to make meaningful contributions to [specific goals/objectives].
-
-I am confident that I have the academic ability, motivation, and commitment necessary to succeed in this program. I look forward to the opportunity to contribute to your academic community and to learn from the distinguished faculty and fellow students.
-
-Thank you for considering my application.`
-  : `Dear Hiring Manager,
-
-I am writing to express my strong interest in the [Position Title] position at [Company Name] in ${country || 'your location'}. With my educational background from ${university || 'my university'} and relevant experience, I am excited about the opportunity to contribute to your team.
-
-Based on your requirements: ${promptInput}
-
-My qualifications include:
-- [Relevant qualification 1]
-- [Relevant qualification 2]
-- [Relevant qualification 3]
-
-I am particularly drawn to this opportunity because of [company/role specific reasons]. My experience in [relevant field] has prepared me well for the challenges of this position, and I am eager to bring my skills and enthusiasm to your organization.
-
-I would welcome the opportunity to discuss how my background and passion for [field] can contribute to [Company Name]'s continued success. Thank you for your time and consideration.
-
-Sincerely,
-[Your Name]`}
-
----
-
-Note: This is a placeholder generated document. In a production environment, this would be generated using AI services like OpenAI GPT or Google's Gemini API with the key: YOUR_GEMINI_API_KEY_HERE`;
+      const generatedText = data.generatedText;
 
       // Save to database
-      const { error } = await supabase
+      const { error: insertError } = await supabase
         .from('sop_documents')
         .insert({
           user_id: user.id,
           document_type: documentType,
           prompt_input: promptInput,
-          generated_text: placeholderText,
+          generated_text: generatedText,
           country: country || null,
           university: university || null,
         });
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
       toast({
         title: "Success",
