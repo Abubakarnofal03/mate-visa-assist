@@ -9,7 +9,141 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      documents: {
+        Row: {
+          document_name: string
+          document_type: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_completed: boolean | null
+          updated_at: string
+          uploaded_at: string
+          user_id: string
+        }
+        Insert: {
+          document_name: string
+          document_type: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_completed?: boolean | null
+          updated_at?: string
+          uploaded_at?: string
+          user_id: string
+        }
+        Update: {
+          document_name?: string
+          document_type?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_completed?: boolean | null
+          updated_at?: string
+          uploaded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sop_documents: {
+        Row: {
+          country: string | null
+          created_at: string
+          document_type: string
+          generated_text: string
+          id: string
+          prompt_input: string
+          university: string | null
+          user_id: string
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string
+          document_type: string
+          generated_text: string
+          id?: string
+          prompt_input: string
+          university?: string | null
+          user_id: string
+        }
+        Update: {
+          country?: string | null
+          created_at?: string
+          document_type?: string
+          generated_text?: string
+          id?: string
+          prompt_input?: string
+          university?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      visa_progress: {
+        Row: {
+          created_at: string
+          financial_documents_ready: boolean | null
+          id: string
+          ielts_submitted: boolean | null
+          medical_check_done: boolean | null
+          university_offer_letter: boolean | null
+          updated_at: string
+          user_id: string
+          visa_form_filled: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          financial_documents_ready?: boolean | null
+          id?: string
+          ielts_submitted?: boolean | null
+          medical_check_done?: boolean | null
+          university_offer_letter?: boolean | null
+          updated_at?: string
+          user_id: string
+          visa_form_filled?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          financial_documents_ready?: boolean | null
+          id?: string
+          ielts_submitted?: boolean | null
+          medical_check_done?: boolean | null
+          university_offer_letter?: boolean | null
+          updated_at?: string
+          user_id?: string
+          visa_form_filled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
