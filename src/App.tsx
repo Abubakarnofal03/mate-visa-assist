@@ -14,7 +14,6 @@ import VisaProgress from "./pages/VisaProgress";
 import SOP from "./pages/SOP";
 import Resume from "./pages/Resume";
 import Profile from "./pages/Profile";
-import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -168,7 +167,23 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
-            <Route path="*" element={<NotFound />} />
+            <Route path="*" element={
+              <ProtectedRoute>
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1 flex flex-col overflow-hidden">
+                      <div className="p-2 border-b md:hidden">
+                        <SidebarTrigger />
+                      </div>
+                      <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
+                        <Dashboard />
+                      </div>
+                    </main>
+                  </div>
+                </SidebarProvider>
+              </ProtectedRoute>
+            } />
           </Routes>
           </AuthProvider>
         </BrowserRouter>
