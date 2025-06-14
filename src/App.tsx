@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
 import VisaProgress from "./pages/VisaProgress";
 import SOP from "./pages/SOP";
+import Resume from "./pages/Resume";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -66,6 +67,15 @@ const App = () => (
                 <ProtectedRoute>
                   <Navigation />
                   <SOP />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/resume" 
+              element={
+                <ProtectedRoute>
+                  <Navigation />
+                  <Resume />
                 </ProtectedRoute>
               } 
             />

@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Plus, Sparkles, Download } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import {
@@ -31,10 +32,17 @@ interface SOPDocument {
   created_at: string;
 }
 
+interface Resume {
+  id: string;
+  title: string;
+  parsed_content: string | null;
+}
+
 const SOP = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [documents, setDocuments] = useState<SOPDocument[]>([]);
+  const [resumes, setResumes] = useState<Resume[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,9 +52,11 @@ const SOP = () => {
   const [country, setCountry] = useState('');
   const [university, setUniversity] = useState('');
   const [promptInput, setPromptInput] = useState('');
+  const [selectedResumeId, setSelectedResumeId] = useState<string>('');
 
   useEffect(() => {
     fetchDocuments();
+    fetchResumes();
   }, [user]);
 
   const fetchDocuments = async () => {
@@ -73,6 +83,23 @@ const SOP = () => {
     }
   };
 
+  const fetchResumes = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('resumes')
+        .select('id, title, parsed_content')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setResumes(data || []);
+    } catch (error) {
+      console.error('Error fetching resumes:', error);
+    }
+  };
+
   const generateDocument = async () => {
     if (!promptInput.trim() || !user) {
       toast({
@@ -86,6 +113,10 @@ const SOP = () => {
     setGenerating(true);
 
     try {
+      // Get selected resume data if any
+      const selectedResume = selectedResumeId ? resumes.find(r => r.id === selectedResumeId) : null;
+      const resumeData = selectedResume?.parsed_content || null;
+
       // Call Gemini API through Supabase Edge Function
       const { data, error: functionError } = await supabase.functions.invoke('generate-with-gemini', {
         body: {
@@ -93,6 +124,7 @@ const SOP = () => {
           prompt: promptInput,
           country: country || null,
           university: university || null,
+          resumeData: resumeData,
         },
       });
 
@@ -290,6 +322,24 @@ const SOP = () => {
                     />
                   </div>
                 </div>
+                {resumes.length > 0 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="resume-select">Select Resume (Optional)</Label>
+                    <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a resume to include..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No resume selected</SelectItem>
+                        {resumes.map((resume) => (
+                          <SelectItem key={resume.id} value={resume.id}>
+                            {resume.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="prompt">Additional Details</Label>
                   <Textarea
@@ -322,6 +372,24 @@ const SOP = () => {
                     />
                   </div>
                 </div>
+                {resumes.length > 0 && (
+                  <div className="space-y-2">
+                    <Label htmlFor="resume-select-cl">Select Resume (Optional)</Label>
+                    <Select value={selectedResumeId} onValueChange={setSelectedResumeId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a resume to include..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No resume selected</SelectItem>
+                        {resumes.map((resume) => (
+                          <SelectItem key={resume.id} value={resume.id}>
+                            {resume.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="prompt-cl">Job Description & Your Qualifications</Label>
                   <Textarea

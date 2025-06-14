@@ -75,6 +75,42 @@ export type Database = {
         }
         Relationships: []
       }
+      resumes: {
+        Row: {
+          ai_rating: number | null
+          ai_suggestions: string | null
+          created_at: string
+          file_url: string
+          id: string
+          parsed_content: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_rating?: number | null
+          ai_suggestions?: string | null
+          created_at?: string
+          file_url: string
+          id?: string
+          parsed_content?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_rating?: number | null
+          ai_suggestions?: string | null
+          created_at?: string
+          file_url?: string
+          id?: string
+          parsed_content?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sop_documents: {
         Row: {
           country: string | null

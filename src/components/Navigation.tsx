@@ -21,6 +21,7 @@ const Navigation = () => {
     { path: '/documents', label: 'Documents' },
     { path: '/visa-progress', label: 'Visa Progress' },
     { path: '/sop', label: 'SOPs' },
+    { path: '/resume', label: 'Resume' },
     { path: '/profile', label: 'Profile' },
   ];
 
