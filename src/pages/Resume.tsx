@@ -101,21 +101,27 @@ const Resume = () => {
     setUploading(true);
 
     try {
+      console.log('Starting resume upload...', { title, fileName: selectedFile.name, userId: user.id });
+      
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('title', title);
       formData.append('userId', user.id);
 
+      console.log('Calling parse-resume function...');
       const { data, error } = await supabase.functions.invoke('parse-resume', {
         body: formData,
       });
 
+      console.log('Function response:', { data, error });
+
       if (error) {
-        console.error('Upload error:', error);
-        throw new Error(error.message || 'Failed to upload resume');
+        console.error('Function invocation error:', error);
+        throw new Error(error.message || 'Failed to invoke parse-resume function');
       }
 
       if (!data?.success) {
+        console.error('Function returned error:', data);
         throw new Error(data?.error || 'Failed to process resume');
       }
 
