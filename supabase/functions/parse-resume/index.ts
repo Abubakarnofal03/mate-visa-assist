@@ -2,7 +2,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const geminiApiKey = "AIzaSyD08db9gKCjzHM6gvAi1a5b22Ant_9MPqE";
+const groqApiKey = "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";
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
@@ -118,7 +118,7 @@ serve(async (req) => {
 
     console.log('PDF parsed, content length:', parsedContent.length);
 
-    // Analyze resume with Gemini API
+    // Analyze resume with Groq API
     const analysisPrompt = `
 Analyze this resume and provide:
 1. ATS (Applicant Tracking System) optimization suggestions
@@ -138,32 +138,34 @@ Resume content:
 ${parsedContent}
 `;
 
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: analysisPrompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 1,
-            topP: 1,
-            maxOutputTokens: 2048,
-          },
-        }),
-      }
-    );
+    const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${groqApiKey}`,
+      },
+      body: JSON.stringify({
+        model: "meta-llama/llama-3.1-70b-versatile",
+        messages: [
+          {
+            role: "user",
+            content: analysisPrompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2048,
+      }),
+    });
 
     let aiSuggestions = '';
     let aiRating = null;
 
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('Gemini API error:', errorText);
+    if (!groqResponse.ok) {
+      const errorText = await groqResponse.text();
+      console.error('Groq API error:', errorText);
       
       // Check if it's a quota error and provide fallback
-      if (geminiResponse.status === 429 || errorText.includes('quota')) {
+      if (groqResponse.status === 429 || errorText.includes('quota')) {
         console.log('Quota exceeded, providing fallback analysis');
         aiSuggestions = `
         <h3>Resume Analysis (Fallback Mode)</h3>
@@ -188,8 +190,8 @@ ${parsedContent}
         throw new Error('Failed to analyze resume');
       }
     } else {
-      const geminiData = await geminiResponse.json();
-      aiSuggestions = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
+      const groqData = await groqResponse.json();
+      aiSuggestions = groqData.choices?.[0]?.message?.content;
 
       if (!aiSuggestions) {
         throw new Error('No analysis generated');
