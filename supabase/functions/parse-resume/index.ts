@@ -124,6 +124,14 @@ serve(async (req) => {
 
     console.log('PDF parsed, content length:', parsedContent.length);
 
+    // Truncate parsed content to stay within API limits (approximately 3000 characters)
+    const maxContentLength = 3000;
+    const truncatedContent = parsedContent.length > maxContentLength 
+      ? parsedContent.substring(0, maxContentLength) + '...'
+      : parsedContent;
+
+    console.log('Truncated content length:', truncatedContent.length);
+
     // Analyze resume with Groq API
     const analysisPrompt = `
 Analyze this resume and provide:
@@ -141,7 +149,7 @@ Please structure your response in HTML format with:
 - Include a clear rating section with score out of 10
 
 Resume content:
-${parsedContent}
+${truncatedContent}
 `;
 
     console.log('Calling Groq API for analysis...');
