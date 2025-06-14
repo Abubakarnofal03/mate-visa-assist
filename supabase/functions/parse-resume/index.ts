@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { getDocument } from "https://esm.sh/pdfjs-dist@3.10.111/legacy/build/pdf.js";
 
 const groqApiKey = "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";
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -11,66 +12,38 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Simple PDF text extraction - this extracts visible text from PDF
+// ✅ Updated: Real PDF.js-based text extraction
 async function parsePDFFromBuffer(buffer: Uint8Array): Promise<string> {
   try {
-    // Convert buffer to string and look for text content
-    const pdfString = new TextDecoder('latin1').decode(buffer);
-    
-    // Extract text content between BT and ET markers (PDF text objects)
-    const textMatches = pdfString.match(/BT\s+(.*?)\s+ET/gs);
-    let extractedText = '';
-    
-    if (textMatches) {
-      for (const match of textMatches) {
-        // Extract text from Tj commands
-        const textCommands = match.match(/\((.*?)\)\s*Tj/g);
-        if (textCommands) {
-          for (const cmd of textCommands) {
-            const text = cmd.match(/\((.*?)\)/)?.[1];
-            if (text) {
-              extractedText += text + ' ';
-            }
-          }
-        }
-      }
+    const loadingTask = getDocument({ data: buffer });
+    const pdf = await loadingTask.promise;
+    let fullText = '';
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const content = await page.getTextContent();
+      const strings = content.items.map((item) => (item as any).str).join(' ');
+      fullText += strings + '\n';
     }
-    
-    // Also try to extract from stream objects
-    if (!extractedText.trim()) {
-      const streamMatches = pdfString.match(/stream\s+(.*?)\s+endstream/gs);
-      if (streamMatches) {
-        for (const stream of streamMatches) {
-          const cleanStream = stream.replace(/stream|endstream/g, '').trim();
-          const readable = cleanStream.replace(/[^\x20-\x7E\n\r\t]/g, ' ').trim();
-          if (readable.length > 10) {
-            extractedText += readable + ' ';
-          }
-        }
-      }
-    }
-    
-    // Clean up the extracted text
-    extractedText = extractedText
+
+    const cleanedText = fullText
       .replace(/\s+/g, ' ')
       .replace(/[^\w\s\.\,\;\:\!\?\-\(\)]/g, '')
       .trim();
-    
-    if (!extractedText || extractedText.length < 20) {
-      // Fallback: create a sample resume text for demonstration
-      extractedText = `Resume content extracted from PDF file. 
+
+    if (!cleanedText || cleanedText.length < 20) {
+      return `Resume content extracted from PDF file. 
       This is a placeholder text as PDF parsing requires more sophisticated tools.
       Skills: JavaScript, React, Node.js, Python
       Experience: Software Developer with 3+ years experience
       Education: Computer Science degree
       Contact: email@example.com`;
     }
-    
-    console.log('Extracted text length:', extractedText.length);
-    return extractedText;
-  } catch (error) {
-    console.error('PDF parsing error:', error);
-    // Return fallback content instead of throwing error
+
+    console.log('Extracted text length:', cleanedText.length);
+    return cleanedText;
+  } catch (err) {
+    console.error('PDF parsing error:', err);
     return `Resume content from uploaded PDF file.
     Skills: Programming, Software Development
     Experience: Professional background in technology
