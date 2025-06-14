@@ -145,7 +145,7 @@ ${parsedContent}
         'Authorization': `Bearer ${groqApiKey}`,
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.1-70b-versatile",
+        model: "llama3-8b-8192",
         messages: [
           {
             role: "user",

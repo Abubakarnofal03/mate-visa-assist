@@ -86,7 +86,7 @@ Important: Format the entire response as valid HTML that can be directly embedde
         'Authorization': `Bearer ${groqApiKey}`,
       },
       body: JSON.stringify({
-        model: "meta-llama/llama-3.1-70b-versatile",
+        model: "llama3-8b-8192",
         messages: [
           {
             role: "user",
