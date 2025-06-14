@@ -52,7 +52,7 @@ const SOP = () => {
   const [country, setCountry] = useState('');
   const [university, setUniversity] = useState('');
   const [promptInput, setPromptInput] = useState('');
-  const [selectedResumeId, setSelectedResumeId] = useState<string>('');
+  const [selectedResumeId, setSelectedResumeId] = useState<string>('none');
 
   useEffect(() => {
     fetchDocuments();
@@ -114,7 +114,7 @@ const SOP = () => {
 
     try {
       // Get selected resume data if any
-      const selectedResume = selectedResumeId ? resumes.find(r => r.id === selectedResumeId) : null;
+      const selectedResume = selectedResumeId && selectedResumeId !== 'none' ? resumes.find(r => r.id === selectedResumeId) : null;
       const resumeData = selectedResume?.parsed_content || null;
 
       // Call Gemini API through Supabase Edge Function
@@ -330,7 +330,7 @@ const SOP = () => {
                         <SelectValue placeholder="Choose a resume to include..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No resume selected</SelectItem>
+                        <SelectItem value="none">No resume selected</SelectItem>
                         {resumes.map((resume) => (
                           <SelectItem key={resume.id} value={resume.id}>
                             {resume.title}
@@ -380,7 +380,7 @@ const SOP = () => {
                         <SelectValue placeholder="Choose a resume to include..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No resume selected</SelectItem>
+                        <SelectItem value="none">No resume selected</SelectItem>
                         {resumes.map((resume) => (
                           <SelectItem key={resume.id} value={resume.id}>
                             {resume.title}
