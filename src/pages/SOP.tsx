@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Plus, Sparkles, Download } from 'lucide-react';
+import { FileText, Plus, Sparkles, Download, Edit, Save, X } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
+import { saveAs } from 'file-saver';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +53,10 @@ const SOP = () => {
   const [university, setUniversity] = useState('');
   const [promptInput, setPromptInput] = useState('');
   const [selectedResumeId, setSelectedResumeId] = useState<string>('none');
+  
+  // Editing state
+  const [editingDocumentId, setEditingDocumentId] = useState<string | null>(null);
+  const [editedContent, setEditedContent] = useState<string>('');
 
   useEffect(() => {
     fetchDocuments();
@@ -176,82 +180,108 @@ const SOP = () => {
     }
   };
   
-  const downloadAsPDF = async (document: SOPDocument) => {
+  const downloadAsWord = async (document: SOPDocument) => {
     try {
-      const element = document.id + '-content';
-      const contentElement = window.document.getElementById(element);
+      // Get current content (either edited or original)
+      const content = editingDocumentId === document.id ? editedContent : document.generated_text;
       
-      if (!contentElement) {
-        toast({
-          title: "Error",
-          description: "Content not found for PDF generation",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create a temporary div with better styling for PDF
+      // Convert HTML to plain text for Word document
       const tempDiv = window.document.createElement('div');
-      tempDiv.innerHTML = `
-        <div style="padding: 40px; font-family: 'Times New Roman', serif; line-height: 1.6; color: #000;">
-          <h1 style="text-align: center; margin-bottom: 30px; font-size: 24px; text-transform: uppercase;">
-            ${document.document_type === 'sop' ? 'Statement of Purpose' : 'Cover Letter'}
-          </h1>
-          <div style="font-size: 14px;">
-            ${document.generated_text}
-          </div>
-        </div>
-      `;
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm'; // A4 width
-      tempDiv.style.backgroundColor = '#fff';
+      tempDiv.innerHTML = content;
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
       
-      window.document.body.appendChild(tempDiv);
-
-      const canvas = await html2canvas(tempDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff'
+      // Create Word document
+      const doc = new Document({
+        sections: [{
+          properties: {},
+          children: [
+            new Paragraph({
+              text: document.document_type === 'sop' ? 'Statement of Purpose' : 'Cover Letter',
+              heading: HeadingLevel.HEADING_1,
+              alignment: 'center',
+            }),
+            new Paragraph({
+              text: '',
+            }),
+            ...plainText.split('\n\n')
+              .filter(paragraph => paragraph.trim())
+              .map(paragraph => 
+                new Paragraph({
+                  children: [new TextRun(paragraph.trim())],
+                  spacing: {
+                    after: 200,
+                  },
+                })
+              ),
+          ],
+        }],
       });
 
-      window.document.body.removeChild(tempDiv);
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const fileName = `${document.document_type === 'sop' ? 'Statement_of_Purpose' : 'Cover_Letter'}_${new Date().toISOString().split('T')[0]}.pdf`;
-      pdf.save(fileName);
+      // Generate and download the Word document
+      const buffer = await Packer.toBlob(doc);
+      const fileName = `${document.document_type === 'sop' ? 'Statement_of_Purpose' : 'Cover_Letter'}_${new Date().toISOString().split('T')[0]}.docx`;
+      saveAs(buffer, fileName);
 
       toast({
         title: "Success",
-        description: "PDF downloaded successfully",
+        description: "Word document downloaded successfully",
       });
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error generating Word document:', error);
       toast({
         title: "Error",
-        description: "Failed to generate PDF",
+        description: "Failed to generate Word document",
         variant: "destructive",
       });
     }
+  };
+
+  const startEditing = (document: SOPDocument) => {
+    setEditingDocumentId(document.id);
+    // Convert HTML to plain text for editing
+    const tempDiv = window.document.createElement('div');
+    tempDiv.innerHTML = document.generated_text;
+    setEditedContent(tempDiv.textContent || tempDiv.innerText || '');
+  };
+
+  const saveChanges = async (documentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('sop_documents')
+        .update({ generated_text: editedContent })
+        .eq('id', documentId);
+
+      if (error) throw error;
+
+      // Update local state
+      setDocuments(docs => 
+        docs.map(doc => 
+          doc.id === documentId 
+            ? { ...doc, generated_text: editedContent }
+            : doc
+        )
+      );
+
+      setEditingDocumentId(null);
+      setEditedContent('');
+
+      toast({
+        title: "Success",
+        description: "Document updated successfully",
+      });
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save changes",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingDocumentId(null);
+    setEditedContent('');
   };
 
   if (loading) {
@@ -463,39 +493,86 @@ const SOP = () => {
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2">Generated Document:</h4>
-                  <div 
-                    id={`${doc.id}-content`}
-                    className="bg-background border rounded p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none"
-                    dangerouslySetInnerHTML={{ 
-                      __html: doc.generated_text || 'No content available' 
-                    }}
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">Generated Document:</h4>
+                    {editingDocumentId !== doc.id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => startEditing(doc)}
+                        className="gap-2"
+                      >
+                        <Edit className="h-4 w-4" />
+                        Edit
+                      </Button>
+                    )}
+                  </div>
+                  
+                  {editingDocumentId === doc.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editedContent}
+                        onChange={(e) => setEditedContent(e.target.value)}
+                        className="min-h-[300px] font-mono text-sm"
+                        placeholder="Edit your document content..."
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={cancelEditing}
+                          className="gap-2"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => saveChanges(doc.id)}
+                          className="gap-2"
+                        >
+                          <Save className="h-4 w-4" />
+                          Save Changes
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      id={`${doc.id}-content`}
+                      className="bg-background border rounded p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none"
+                      dangerouslySetInnerHTML={{ 
+                        __html: doc.generated_text || 'No content available' 
+                      }}
+                    />
+                  )}
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(doc.generated_text);
-                      toast({
-                        title: "Copied!",
-                        description: "Document copied to clipboard",
-                      });
-                    }}
-                  >
-                    Copy to Clipboard
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => downloadAsPDF(doc)}
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download PDF
-                  </Button>
-                </div>
+                
+                {editingDocumentId !== doc.id && (
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(doc.generated_text);
+                        toast({
+                          title: "Copied!",
+                          description: "Document copied to clipboard",
+                        });
+                      }}
+                    >
+                      Copy to Clipboard
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => downloadAsWord(doc)}
+                      className="flex items-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download Word
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))
