@@ -1,11 +1,12 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, ProtectedRoute } from "./hooks/useAuth";
 import { ThemeProvider } from "./components/ThemeProvider";
-import Navigation from "./components/Navigation";
+import AppSidebar from "./components/AppSidebar";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
@@ -31,8 +32,19 @@ const App = () => (
               path="/" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <Dashboard />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <Dashboard />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
@@ -40,8 +52,19 @@ const App = () => (
               path="/dashboard" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <Dashboard />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <Dashboard />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
@@ -49,8 +72,19 @@ const App = () => (
               path="/documents" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <Documents />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <Documents />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
@@ -58,8 +92,19 @@ const App = () => (
               path="/visa-progress" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <VisaProgress />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <VisaProgress />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
@@ -67,8 +112,19 @@ const App = () => (
               path="/sop" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <SOP />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <SOP />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
@@ -76,8 +132,19 @@ const App = () => (
               path="/resume" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <Resume />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <Resume />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
@@ -85,8 +152,19 @@ const App = () => (
               path="/profile" 
               element={
                 <ProtectedRoute>
-                  <Navigation />
-                  <Profile />
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1 flex flex-col">
+                        <div className="p-4 border-b md:hidden">
+                          <SidebarTrigger />
+                        </div>
+                        <div className="flex-1 p-6">
+                          <Profile />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
                 </ProtectedRoute>
               } 
             />
