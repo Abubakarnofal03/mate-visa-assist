@@ -240,7 +240,7 @@ const Documents = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-background via-background to-secondary/5 min-h-screen">
+    <div className="space-y-4 sm:space-y-6 bg-gradient-to-br from-background via-background to-secondary/5 min-h-screen">
       <div className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Documents</h1>
         <p className="text-muted-foreground">
@@ -257,7 +257,7 @@ const Documents = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="documentType">Document Type</Label>
               <select
@@ -324,9 +324,9 @@ const Documents = () => {
               {documents.map((doc) => (
                 <div
                   key={doc.id}
-                  className="flex items-center justify-between p-4 border rounded-lg bg-card hover:shadow-md transition-shadow"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg bg-card hover:shadow-md transition-shadow gap-4"
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 min-w-0 flex-1">
                     <div className={`p-2 rounded-full ${doc.is_completed ? 'bg-green-100 dark:bg-green-900' : 'bg-orange-100 dark:bg-orange-900'}`}>
                       {doc.is_completed ? (
                         <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
@@ -334,19 +334,19 @@ const Documents = () => {
                         <X className="h-4 w-4 text-orange-600 dark:text-orange-400" />
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-medium">{doc.document_name}</h3>
-                      <p className="text-sm text-muted-foreground">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-medium truncate">{doc.document_name}</h3>
+                      <p className="text-sm text-muted-foreground truncate">
                         {doc.file_name} • Uploaded {new Date(doc.uploaded_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <Badge variant={doc.is_completed ? "secondary" : "outline"}>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                    <Badge variant={doc.is_completed ? "secondary" : "outline"} className="w-fit">
                       {doc.document_type}
                     </Badge>
                     <div className="flex items-center gap-2">
-                      <Label htmlFor={`switch-${doc.id}`} className="text-sm">
+                      <Label htmlFor={`switch-${doc.id}`} className="text-sm whitespace-nowrap">
                         {doc.is_completed ? 'Completed' : 'Pending'}
                       </Label>
                       <Switch
@@ -355,7 +355,7 @@ const Documents = () => {
                         onCheckedChange={() => toggleCompletion(doc.id, doc.is_completed)}
                       />
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {doc.file_url && (
                         <Button
                           variant="outline"

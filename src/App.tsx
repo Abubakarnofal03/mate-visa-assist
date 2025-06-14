@@ -35,11 +35,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <Dashboard />
                         </div>
                       </main>
@@ -55,11 +55,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <Dashboard />
                         </div>
                       </main>
@@ -75,11 +75,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <Documents />
                         </div>
                       </main>
@@ -95,11 +95,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <VisaProgress />
                         </div>
                       </main>
@@ -115,11 +115,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <SOP />
                         </div>
                       </main>
@@ -135,11 +135,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <Resume />
                         </div>
                       </main>
@@ -155,11 +155,11 @@ const App = () => (
                   <SidebarProvider>
                     <div className="min-h-screen flex w-full">
                       <AppSidebar />
-                      <main className="flex-1 flex flex-col">
-                        <div className="p-4 border-b md:hidden">
+                      <main className="flex-1 flex flex-col overflow-hidden">
+                        <div className="p-2 border-b md:hidden">
                           <SidebarTrigger />
                         </div>
-                        <div className="flex-1 p-6">
+                        <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                           <Profile />
                         </div>
                       </main>
