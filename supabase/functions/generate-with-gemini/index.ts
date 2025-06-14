@@ -15,12 +15,12 @@ serve(async (req) => {
   }
 
   try {
-  const { documentType, prompt, country, university } = await req.json();
+  const { documentType, prompt, country, university, resumeData } = await req.json();
 
     console.log('Generating document with Gemini API:', { documentType, country, university });
 
     // Generate a structured prompt with HTML formatting instructions
-    const generatePrompt = (documentType: string, country: string, university: string) => {
+    const generatePrompt = (documentType: string, country: string, university: string, resumeData: string | null) => {
       if (documentType === 'sop') {
         return `Generate a comprehensive Statement of Purpose (SOP) for studying in ${university}, ${country}. 
 
@@ -41,6 +41,7 @@ Include these sections:
 7. **Conclusion** - Summary and commitment statement
 
 Make it professional, personalized, and compelling. Length should be 800-1000 words.
+${resumeData ? `\n\nUse the following resume information to personalize the SOP and extract relevant details:\n${resumeData}` : ''}
 Return ONLY the formatted HTML content without any markdown backticks or additional text.`;
       } else if (documentType === 'cover_letter') {
         return `Generate a professional Cover Letter for a job application or university application in ${country}. 
@@ -62,6 +63,7 @@ Include these sections:
 5. **Signature** - Professional sign-off
 
 Make it professional and compelling. Length should be 300-500 words.
+${resumeData ? `\n\nUse the following resume information to personalize the cover letter and extract relevant qualifications:\n${resumeData}` : ''}
 Return ONLY the formatted HTML content without any markdown backticks or additional text.`;
       } else {
         return `Generate a professional ${documentType} document for ${university}, ${country}. 
@@ -72,7 +74,7 @@ Return ONLY the formatted HTML content without any markdown backticks or additio
       }
     };
 
-    const fullPrompt = `${generatePrompt(documentType, country || 'Not specified', university || 'Not specified')}
+    const fullPrompt = `${generatePrompt(documentType, country || 'Not specified', university || 'Not specified', resumeData)}
 
 Additional information provided by the user:
 ${prompt}
