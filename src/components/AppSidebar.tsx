@@ -82,27 +82,33 @@ const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <div className="flex items-center justify-between p-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="" alt="User" />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    {user?.email?.charAt(0).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuItem onClick={handleSignOut}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="p-4 space-y-2">
+          {/* User info */}
+          <div className="flex items-center space-x-2 text-sm">
+            <Avatar className="h-6 w-6">
+              <AvatarImage src="" alt="User" />
+              <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                {user?.email?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="truncate">{user?.email}</span>
+          </div>
           
-          <ThemeToggle />
+          {/* Action buttons */}
+          <div className="flex items-center justify-between">
+            <ThemeToggle />
+            
+            {/* Mobile-friendly logout button */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleSignOut}
+              className="flex items-center space-x-1"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
