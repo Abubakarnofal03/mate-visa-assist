@@ -1,7 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { getDocument } from "https://esm.sh/pdfjs-dist@3.10.111/legacy/build/pdf.js";
+import * as pdfjsLib from "https://esm.sh/pdfjs-dist@3.10.111";
 
 const groqApiKey = "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";
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -15,7 +15,7 @@ const corsHeaders = {
 // ✅ Updated: Real PDF.js-based text extraction
 async function parsePDFFromBuffer(buffer: Uint8Array): Promise<string> {
   try {
-    const loadingTask = getDocument({ data: buffer });
+    const loadingTask = pdfjsLib.getDocument({ data: buffer });
     const pdf = await loadingTask.promise;
     let fullText = '';
 
