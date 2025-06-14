@@ -6,12 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
@@ -21,6 +23,9 @@ const Auth = () => {
     if (user) {
       navigate('/dashboard');
     }
+    // Load remember me preference on component mount
+    const savedRememberMe = localStorage.getItem('visamate-remember-me') === 'true';
+    setRememberMe(savedRememberMe);
   }, [user, navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -35,7 +40,7 @@ const Auth = () => {
     }
 
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const { error } = await signIn(email, password, rememberMe);
     
     if (error) {
       toast({
@@ -131,6 +136,20 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="rememberMe" 
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => {
+                      const newValue = checked === true;
+                      setRememberMe(newValue);
+                      localStorage.setItem('visamate-remember-me', newValue.toString());
+                    }}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm font-normal">
+                    Remember me
+                  </Label>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Signing in..." : "Sign In"}
