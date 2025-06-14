@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { LogOut, Menu, X } from 'lucide-react';
+import { ThemeToggle } from './ThemeToggle';
 
 const Navigation = () => {
   const { user, signOut } = useAuth();
@@ -55,6 +56,8 @@ const Navigation = () => {
               </Link>
             ))}
             
+            <ThemeToggle />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -76,7 +79,8 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
             <Button
               variant="ghost"
               size="sm"
