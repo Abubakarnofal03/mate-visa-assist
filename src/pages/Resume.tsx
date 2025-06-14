@@ -68,10 +68,16 @@ const Resume = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
+      const allowedTypes = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+        'application/msword' // .doc
+      ];
+      
+      if (!allowedTypes.includes(file.type)) {
         toast({
           title: "Error",
-          description: "Please select a PDF file",
+          description: "Please select a PDF or Word document (.pdf, .docx, .doc)",
           variant: "destructive",
         });
         return;
@@ -92,7 +98,7 @@ const Resume = () => {
     if (!selectedFile || !title.trim() || !user) {
       toast({
         title: "Error",
-        description: "Please provide a title and select a PDF file",
+        description: "Please provide a title and select a document",
         variant: "destructive",
       });
       return;
@@ -220,7 +226,7 @@ const Resume = () => {
                 Upload New Resume
               </DialogTitle>
               <DialogDescription>
-                Upload a PDF resume for AI analysis and suggestions
+                Upload a PDF or Word document for AI analysis and suggestions
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -234,11 +240,11 @@ const Resume = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="file">PDF File</Label>
+                <Label htmlFor="file">Resume Document (.pdf, .docx, .doc)</Label>
                 <Input
                   id="file"
                   type="file"
-                  accept=".pdf"
+                  accept=".pdf,.doc,.docx"
                   onChange={handleFileSelect}
                 />
                 {selectedFile && (

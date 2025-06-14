@@ -1,7 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import * as pdfjsLib from "https://esm.sh/pdfjs-dist@3.10.111";
+import pdfParse from "npm:pdf-parse@1.1.1";
+import mammoth from "npm:mammoth@1.6.0";
 
 const groqApiKey = "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";
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -12,43 +13,39 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// ✅ Updated: Real PDF.js-based text extraction
-async function parsePDFFromBuffer(buffer: Uint8Array): Promise<string> {
+// ✅ Updated: Real document parsing with pdf-parse and mammoth
+async function parseDocumentFromBuffer(buffer: Uint8Array, fileName: string): Promise<string> {
   try {
-    const loadingTask = pdfjsLib.getDocument({ data: buffer });
-    const pdf = await loadingTask.promise;
-    let fullText = '';
+    const fileExt = fileName.split('.').pop()?.toLowerCase();
+    let extractedText = '';
 
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      const page = await pdf.getPage(pageNum);
-      const content = await page.getTextContent();
-      const strings = content.items.map((item) => (item as any).str).join(' ');
-      fullText += strings + '\n';
+    if (fileExt === 'pdf') {
+      console.log('Parsing PDF file...');
+      const data = await pdfParse(buffer);
+      extractedText = data.text;
+    } else if (fileExt === 'docx' || fileExt === 'doc') {
+      console.log('Parsing Word document...');
+      const result = await mammoth.extractRawText({ buffer });
+      extractedText = result.value;
+    } else {
+      throw new Error(`Unsupported file type: ${fileExt}`);
     }
 
-    const cleanedText = fullText
+    // Clean and normalize the extracted text
+    const cleanedText = extractedText
       .replace(/\s+/g, ' ')
-      .replace(/[^\w\s\.\,\;\:\!\?\-\(\)]/g, '')
+      .replace(/[^\w\s\.\,\;\:\!\?\-\(\)\@\/\+\#]/g, '')
       .trim();
 
     if (!cleanedText || cleanedText.length < 20) {
-      return `Resume content extracted from PDF file. 
-      This is a placeholder text as PDF parsing requires more sophisticated tools.
-      Skills: JavaScript, React, Node.js, Python
-      Experience: Software Developer with 3+ years experience
-      Education: Computer Science degree
-      Contact: email@example.com`;
+      throw new Error('No meaningful text extracted from document');
     }
 
-    console.log('Extracted text length:', cleanedText.length);
+    console.log('Successfully extracted text, length:', cleanedText.length);
     return cleanedText;
   } catch (err) {
-    console.error('PDF parsing error:', err);
-    return `Resume content from uploaded PDF file.
-    Skills: Programming, Software Development
-    Experience: Professional background in technology
-    Education: Technical education background
-    Note: Advanced PDF parsing requires specialized tools. This is a demo version.`;
+    console.error('Document parsing error:', err);
+    throw new Error(`Failed to parse document: ${err.message}`);
   }
 }
 
@@ -90,12 +87,12 @@ serve(async (req) => {
 
     console.log('File uploaded successfully:', uploadData.path);
 
-    // Parse PDF content
-    console.log('Starting PDF parsing...');
+    // Parse document content
+    console.log('Starting document parsing...');
     const fileBuffer = await file.arrayBuffer();
-    const parsedContent = await parsePDFFromBuffer(new Uint8Array(fileBuffer));
+    const parsedContent = await parseDocumentFromBuffer(new Uint8Array(fileBuffer), file.name);
 
-    console.log('PDF parsed, content length:', parsedContent.length);
+    console.log('Document parsed, content length:', parsedContent.length);
 
     // Truncate parsed content to stay within API limits (approximately 3000 characters)
     const maxContentLength = 3000;
