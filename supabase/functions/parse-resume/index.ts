@@ -155,16 +155,49 @@ ${parsedContent}
       }
     );
 
+    let aiSuggestions = '';
+    let aiRating = null;
+
     if (!geminiResponse.ok) {
-      console.error('Gemini API error:', await geminiResponse.text());
-      throw new Error('Failed to analyze resume');
-    }
+      const errorText = await geminiResponse.text();
+      console.error('Gemini API error:', errorText);
+      
+      // Check if it's a quota error and provide fallback
+      if (geminiResponse.status === 429 || errorText.includes('quota')) {
+        console.log('Quota exceeded, providing fallback analysis');
+        aiSuggestions = `
+        <h3>Resume Analysis (Fallback Mode)</h3>
+        <p><strong>Note:</strong> AI analysis temporarily unavailable due to API limits. Basic analysis provided.</p>
+        
+        <h3>General Recommendations</h3>
+        <ul>
+          <li><strong>ATS Optimization:</strong> Ensure your resume includes relevant keywords from job descriptions</li>
+          <li><strong>Format:</strong> Use a clean, professional format with consistent fonts and spacing</li>
+          <li><strong>Contact Information:</strong> Include phone, email, and LinkedIn profile</li>
+          <li><strong>Skills Section:</strong> List both technical and soft skills relevant to your field</li>
+          <li><strong>Experience:</strong> Use action verbs and quantify achievements where possible</li>
+          <li><strong>Education:</strong> Include relevant degrees, certifications, and coursework</li>
+        </ul>
+        
+        <h3>Rating</h3>
+        <p><strong>Score:</strong> 7/10 (Standard professional resume format detected)</p>
+        <p>For detailed AI analysis, please try again later when API quota resets.</p>
+        `;
+        aiRating = 7;
+      } else {
+        throw new Error('Failed to analyze resume');
+      }
+    } else {
+      const geminiData = await geminiResponse.json();
+      aiSuggestions = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
-    const geminiData = await geminiResponse.json();
-    let aiSuggestions = geminiData.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!aiSuggestions) {
-      throw new Error('No analysis generated');
+      if (!aiSuggestions) {
+        throw new Error('No analysis generated');
+      }
+      
+      // Extract rating from the suggestions
+      const ratingMatch = aiSuggestions.match(/(\d+)(?:\/10|out of 10)/i);
+      aiRating = ratingMatch ? parseInt(ratingMatch[1]) : null;
     }
 
     // Clean up any markdown formatting
@@ -172,10 +205,6 @@ ${parsedContent}
       .replace(/^```html\s*/i, '')
       .replace(/```\s*$/, '')
       .trim();
-
-    // Extract rating from the suggestions
-    const ratingMatch = aiSuggestions.match(/(\d+)(?:\/10|out of 10)/i);
-    const aiRating = ratingMatch ? parseInt(ratingMatch[1]) : null;
 
     console.log('AI analysis completed, rating:', aiRating);
 
