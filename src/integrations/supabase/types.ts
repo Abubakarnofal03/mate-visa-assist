@@ -147,36 +147,54 @@ export type Database = {
       visa_progress: {
         Row: {
           created_at: string
+          degree_transcript_verified: boolean | null
           financial_documents_ready: boolean | null
           id: string
           ielts_submitted: boolean | null
           medical_check_done: boolean | null
+          passport_ready: boolean | null
+          photos_submitted: boolean | null
+          police_clearance_obtained: boolean | null
+          sop_completed: boolean | null
           university_offer_letter: boolean | null
           updated_at: string
           user_id: string
           visa_form_filled: boolean | null
+          visa_interview_scheduled: boolean | null
         }
         Insert: {
           created_at?: string
+          degree_transcript_verified?: boolean | null
           financial_documents_ready?: boolean | null
           id?: string
           ielts_submitted?: boolean | null
           medical_check_done?: boolean | null
+          passport_ready?: boolean | null
+          photos_submitted?: boolean | null
+          police_clearance_obtained?: boolean | null
+          sop_completed?: boolean | null
           university_offer_letter?: boolean | null
           updated_at?: string
           user_id: string
           visa_form_filled?: boolean | null
+          visa_interview_scheduled?: boolean | null
         }
         Update: {
           created_at?: string
+          degree_transcript_verified?: boolean | null
           financial_documents_ready?: boolean | null
           id?: string
           ielts_submitted?: boolean | null
           medical_check_done?: boolean | null
+          passport_ready?: boolean | null
+          photos_submitted?: boolean | null
+          police_clearance_obtained?: boolean | null
+          sop_completed?: boolean | null
           university_offer_letter?: boolean | null
           updated_at?: string
           user_id?: string
           visa_form_filled?: boolean | null
+          visa_interview_scheduled?: boolean | null
         }
         Relationships: []
       }

@@ -21,16 +21,24 @@ interface Document {
 }
 
 const documentTypes = [
+  'IELTS Certificate',
+  'TOEFL Certificate',
   'Degree Certificate',
   'Transcript',
-  'IELTS Certificate',
+  'University Offer Letter',
+  'Statement of Purpose',
   'Passport',
   'Financial Statement',
-  'University Offer Letter',
-  'Work Experience Letter',
+  'Bank Statement',
+  'Sponsorship Letter',
+  'Photos',
   'Medical Certificate',
   'Police Clearance',
-  'Photos',
+  'Work Experience Letter',
+  'Academic References',
+  'English Proficiency Waiver',
+  'Visa Application Form',
+  'Travel Insurance',
 ];
 
 const Documents = () => {

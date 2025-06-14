@@ -15,6 +15,12 @@ interface VisaProgressData {
   visa_form_filled: boolean;
   financial_documents_ready: boolean;
   medical_check_done: boolean;
+  passport_ready: boolean;
+  photos_submitted: boolean;
+  degree_transcript_verified: boolean;
+  police_clearance_obtained: boolean;
+  sop_completed: boolean;
+  visa_interview_scheduled: boolean;
 }
 
 const progressSteps = [
@@ -24,14 +30,19 @@ const progressSteps = [
     description: 'English language proficiency test results',
   },
   {
+    key: 'degree_transcript_verified' as keyof VisaProgressData,
+    title: 'Degree & Transcript Verified',
+    description: 'Academic credentials verified and authenticated',
+  },
+  {
     key: 'university_offer_letter' as keyof VisaProgressData,
     title: 'University Offer Letter',
     description: 'Conditional or unconditional offer from university',
   },
   {
-    key: 'visa_form_filled' as keyof VisaProgressData,
-    title: 'Visa Form Filled',
-    description: 'Online visa application form completed',
+    key: 'sop_completed' as keyof VisaProgressData,
+    title: 'Statement of Purpose Completed',
+    description: 'Personal statement and motivation letter written',
   },
   {
     key: 'financial_documents_ready' as keyof VisaProgressData,
@@ -39,9 +50,34 @@ const progressSteps = [
     description: 'Bank statements and financial proof documents',
   },
   {
+    key: 'passport_ready' as keyof VisaProgressData,
+    title: 'Passport Ready',
+    description: 'Valid passport with sufficient validity period',
+  },
+  {
+    key: 'photos_submitted' as keyof VisaProgressData,
+    title: 'Photos Submitted',
+    description: 'Passport-sized photographs as per visa requirements',
+  },
+  {
     key: 'medical_check_done' as keyof VisaProgressData,
     title: 'Medical Check Done',
     description: 'Health examination by approved panel physician',
+  },
+  {
+    key: 'police_clearance_obtained' as keyof VisaProgressData,
+    title: 'Police Clearance Obtained',
+    description: 'Criminal background verification certificate',
+  },
+  {
+    key: 'visa_form_filled' as keyof VisaProgressData,
+    title: 'Visa Form Filled',
+    description: 'Online visa application form completed',
+  },
+  {
+    key: 'visa_interview_scheduled' as keyof VisaProgressData,
+    title: 'Visa Interview Scheduled',
+    description: 'Appointment booked for visa interview (if required)',
   },
 ];
 
