@@ -78,7 +78,8 @@ const Profile = () => {
 
       const { error } = await supabase
         .from('profiles')
-        .upsert(updates);
+        .update(updates)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -179,12 +180,12 @@ const Profile = () => {
       // Update profile with avatar URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
+        .update({
           full_name: fullName,
           phone: phone,
           avatar_url: publicUrl,
-        });
+        })
+        .eq('user_id', user.id);
 
       if (updateError) throw updateError;
 
