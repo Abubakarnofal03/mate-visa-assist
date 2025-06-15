@@ -27,21 +27,29 @@ serve(async (req) => {
     }
 
     // Get user context from database
-    const [visaProgressResult, documentsResult, profileResult] = await Promise.all([
+    const [visaProgressResult, documentsResult, profileResult, sopResult] = await Promise.all([
       supabase.from('visa_progress').select('*').eq('user_id', userId).single(),
       supabase.from('documents').select('*').eq('user_id', userId),
-      supabase.from('profiles').select('*').eq('user_id', userId).single()
+      supabase.from('profiles').select('*').eq('user_id', userId).single(),
+      supabase.from('sop_documents').select('*').eq('user_id', userId)
     ]);
 
     const visaProgress = visaProgressResult.data;
     const documents = documentsResult.data || [];
     const profile = profileResult.data;
+    const sopDocuments = sopResult.data || [];
 
     // Build context for AI
     const contextData = {
       visaProgress,
       documents: documents.map(doc => ({ type: doc.document_type, completed: doc.is_completed })),
-      profile: profile ? { name: profile.full_name } : null
+      profile: profile ? { name: profile.full_name } : null,
+      sopDocuments: sopDocuments.map(sop => ({
+        type: sop.document_type,
+        country: sop.country,
+        university: sop.university,
+        promptInput: sop.prompt_input?.substring(0, 200) // First 200 chars for context
+      }))
     };
 
     // Calculate progress stats
@@ -64,6 +72,10 @@ serve(async (req) => {
     const progressPercentage = Math.round((completedSteps / totalSteps) * 100);
 
     // Create AI prompt with context
+    const sopInfo = sopDocuments.length > 0 
+      ? sopDocuments.map(sop => `${sop.type} for ${sop.country}${sop.university ? ` - ${sop.university}` : ''}`).join(', ')
+      : 'None created yet';
+
     const consultantPrompt = `You are an expert visa consultant AI assistant specializing in helping students with visa applications for studying abroad. You have deep knowledge about visa processes for major study destinations including Canada, Australia, UK, US, and other countries.
 
 CURRENT USER CONTEXT:
@@ -72,6 +84,8 @@ CURRENT USER CONTEXT:
 - Completed Steps: ${Object.entries(progressStats).filter(([_, completed]) => completed).map(([step, _]) => step).join(', ') || 'None'}
 - Pending Steps: ${Object.entries(progressStats).filter(([_, completed]) => !completed).map(([step, _]) => step).join(', ') || 'All complete'}
 - Uploaded Documents: ${documents.filter(doc => doc.is_completed).map(doc => doc.document_type).join(', ') || 'None'}
+- SOPs Created: ${sopInfo}
+${sopDocuments.length > 0 ? `- Application Details: ${sopDocuments.map(sop => `Applying to ${sop.country}${sop.university ? ` (${sop.university})` : ''}`).join(', ')}` : ''}
 
 GUIDELINES:
 1. Provide specific, actionable advice based on the user's current progress
