@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, Check, X, Trash2 } from 'lucide-react';
+import { Upload, FileText, Check, X, Trash2, Download, Eye } from 'lucide-react';
 
 interface Document {
   id: string;
@@ -224,6 +224,35 @@ const Documents = () => {
     }
   };
 
+  const downloadDocument = async (fileUrl: string, fileName: string) => {
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error('Download failed');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Document downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download document",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -357,21 +386,35 @@ const Documents = () => {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {doc.file_url && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.open(doc.file_url!, '_blank')}
-                        >
-                          View
-                        </Button>
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(doc.file_url!, '_blank')}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadDocument(doc.file_url!, doc.file_name || 'document')}
+                            className="flex items-center gap-1"
+                          >
+                            <Download className="h-4 w-4" />
+                            Download
+                          </Button>
+                        </>
                       )}
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => deleteDocument(doc.id, doc.file_url)}
-                        className="text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive flex items-center gap-1"
                       >
                         <Trash2 className="h-4 w-4" />
+                        Delete
                       </Button>
                     </div>
                   </div>
