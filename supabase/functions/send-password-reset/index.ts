@@ -105,7 +105,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email
     const emailResponse = await resend.emails.send({
-      from: 'VisaMate <noreply@resend.dev>', // Update with your verified domain
+      from: 'VisaMate <onboarding@resend.dev>', // Use Resend's default verified domain
       to: [email],
       subject: 'Reset your VisaMate password',
       html: `
