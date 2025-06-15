@@ -244,6 +244,15 @@ const Profile = () => {
         <p className="text-muted-foreground">
           Manage your account settings and preferences
         </p>
+        {(!profile?.residence_country) && (
+          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mt-4">
+            <h3 className="font-semibold text-primary mb-2">Welcome to VisaMate! 🎉</h3>
+            <p className="text-sm text-muted-foreground">
+              To get started, please complete your profile by adding your residence country. 
+              This helps us provide personalized visa guidance and recommendations.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6 max-w-2xl">

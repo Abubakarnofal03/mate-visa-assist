@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { X, ArrowLeft, ArrowRight, Sparkles, Target, FileText, Calendar, User, Briefcase, LayoutDashboard } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, Sparkles, Target, FileText, Calendar, User, Briefcase, LayoutDashboard, MessageCircle } from 'lucide-react';
 
 const Tutorial = () => {
   const { isActive, currentStep, steps, nextStep, prevStep, skipTutorial } = useTutorial();
@@ -80,6 +80,8 @@ const Tutorial = () => {
         return <Target className="h-6 w-6 text-green-500" />;
       case 'documents':
         return <FileText className="h-6 w-6 text-orange-500" />;
+      case 'visa-consultant':
+        return <MessageCircle className="h-6 w-6 text-cyan-500" />;
       case 'sop':
         return <FileText className="h-6 w-6 text-purple-500" />;
       case 'resume':

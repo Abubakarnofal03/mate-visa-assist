@@ -7,9 +7,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  userProfile: any | null;
   signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
+  checkProfileAndRedirect: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +20,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
+
+      if (!error && data) {
+        setUserProfile(data);
+        return data;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -25,6 +47,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Fetch user profile when user logs in
+        if (session?.user) {
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
+        } else {
+          setUserProfile(null);
+        }
+        
         setLoading(false);
       }
     );
@@ -33,6 +65,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
+      
       setLoading(false);
     });
 
@@ -72,16 +109,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     // Clear remember me preference on manual logout
     localStorage.removeItem('visamate-remember-me');
+    setUserProfile(null);
     await supabase.auth.signOut();
+  };
+
+  const checkProfileAndRedirect = async () => {
+    if (user && !userProfile?.residence_country) {
+      return '/profile';
+    }
+    return null;
   };
 
   const value = {
     user,
     session,
     loading,
+    userProfile,
     signIn,
     signUp,
     signOut,
+    checkProfileAndRedirect,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -96,14 +143,26 @@ export const useAuth = () => {
 };
 
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, userProfile, checkProfileAndRedirect } = useAuth();
   const navigate = useNavigate();
+  const [profileChecked, setProfileChecked] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user && userProfile !== null && !profileChecked) {
+      setProfileChecked(true);
+      
+      // Check if user needs to complete profile
+      if (!userProfile?.residence_country) {
+        navigate('/profile');
+      }
+    }
+  }, [user, userProfile, profileChecked, navigate]);
 
   if (loading) {
     return (

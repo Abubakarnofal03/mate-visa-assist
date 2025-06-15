@@ -48,6 +48,12 @@ const tutorialSteps: TutorialStep[] = [
     target: '[data-tutorial="documents"]',
   },
   {
+    id: 'visa-consultant',
+    title: 'AI Visa Consultant',
+    description: 'Get personalized visa guidance and answers to your questions from our AI consultant. Available 24/7 to help with your queries.',
+    target: '[data-tutorial="visa-consultant"]',
+  },
+  {
     id: 'sop',
     title: 'AI-Powered SOP Generation',
     description: 'Create compelling Statements of Purpose and cover letters using our advanced AI. Tailored to your profile and target universities.',
@@ -73,14 +79,14 @@ const tutorialSteps: TutorialStep[] = [
 ];
 
 export const TutorialProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [steps] = useState(tutorialSteps);
 
   useEffect(() => {
-    // Check if user has completed tutorial
-    if (user) {
+    // Check if user has completed tutorial and profile is complete
+    if (user && userProfile && userProfile.residence_country) {
       const hasSeenTutorial = localStorage.getItem(`tutorial-completed-${user.id}`);
       if (!hasSeenTutorial) {
         // Small delay to let the app load
@@ -89,7 +95,7 @@ export const TutorialProvider = ({ children }: { children: ReactNode }) => {
         }, 1000);
       }
     }
-  }, [user]);
+  }, [user, userProfile]);
 
   const startTutorial = () => {
     setCurrentStep(0);
