@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.50.0';
 import { Resend } from "npm:resend@2.0.0";
@@ -31,11 +32,11 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    // Check if RESEND_API_KEY is available
+    // Initialize Resend
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     if (!resendApiKey) {
       console.error('RESEND_API_KEY environment variable is not set');
-      return new Response(JSON.stringify({ error: 'Email service configuration error' }), {
+      return new Response(JSON.stringify({ error: 'Email service not configured' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -43,6 +44,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const resend = new Resend(resendApiKey);
     const { email }: PasswordResetRequest = await req.json();
+
+    console.log('Password reset request for email:', email);
 
     if (!email) {
       return new Response(JSON.stringify({ error: 'Email is required' }), {
@@ -60,6 +63,8 @@ const handler = async (req: Request): Promise<Response> => {
       supabase.rpc('check_reset_rate_limit', { p_identifier: clientIP })
     ]);
 
+    console.log('Rate limit check results:', { emailRateLimit: emailRateLimit.data, ipRateLimit: ipRateLimit.data });
+
     if (!emailRateLimit.data || !ipRateLimit.data) {
       return new Response(JSON.stringify({ 
         error: 'Too many reset attempts. Please try again later.' 
@@ -72,6 +77,8 @@ const handler = async (req: Request): Promise<Response> => {
     // Check if user exists
     const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(email);
     
+    console.log('User lookup result:', { found: !!userData.user, error: userError });
+
     if (userError || !userData.user) {
       // Always return success to prevent email enumeration
       return new Response(JSON.stringify({ 
@@ -86,6 +93,8 @@ const handler = async (req: Request): Promise<Response> => {
     const token = randomBytes(32).toString('hex');
     const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    console.log('Generated reset token for user:', userData.user.id);
 
     // Store reset token
     const { error: tokenError } = await supabase
@@ -112,9 +121,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Generate reset URL
     const resetUrl = `${req.headers.get('origin') || 'https://your-app.com'}/reset-password?token=${token}`;
 
+    console.log('Sending password reset email to:', email);
+
     // Send email
     const emailResponse = await resend.emails.send({
-      from: 'VisaMate <onboarding@resend.dev>', // Use Resend's default verified domain
+      from: 'VisaMate <onboarding@resend.dev>',
       to: [email],
       subject: 'Reset your VisaMate password',
       html: `
@@ -125,7 +136,7 @@ const handler = async (req: Request): Promise<Response> => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Reset Your Password - VisaMate</title>
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f6f9fc;">
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f6f9fc;">
           <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
