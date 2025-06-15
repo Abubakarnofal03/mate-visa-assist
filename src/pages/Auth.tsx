@@ -110,25 +110,40 @@ const Auth = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+    
+    try {
+      const { error } = await supabase.functions.invoke('send-password-reset', {
+        body: { email: forgotPasswordEmail }
       });
-    } else {
+
+      if (error) {
+        throw error;
+      }
+
       toast({
         title: "Password reset email sent",
-        description: "Please check your email for password reset instructions.",
+        description: "If an account with that email exists, a password reset link has been sent to your email.",
       });
       setShowForgotPassword(false);
       setForgotPasswordEmail('');
+    } catch (error: any) {
+      if (error.message?.includes('rate limit') || error.message?.includes('Too many')) {
+        toast({
+          title: "Too many attempts",
+          description: "Please wait before requesting another password reset.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Password reset email sent",
+          description: "If an account with that email exists, a password reset link has been sent to your email.",
+        });
+        setShowForgotPassword(false);
+        setForgotPasswordEmail('');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
