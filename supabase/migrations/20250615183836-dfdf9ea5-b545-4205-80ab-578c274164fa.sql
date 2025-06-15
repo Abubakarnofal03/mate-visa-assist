@@ -1,0 +1,2 @@
+-- Store the Resend API key as a secret
+-- This will be handled by the Supabase secrets management system
