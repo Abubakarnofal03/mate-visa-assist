@@ -89,9 +89,8 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Use Supabase's built-in password reset functionality
-    const origin = req.headers.get('origin') || 'https://4fe7e394-08f7-4784-94c8-57df2d2f4a95.lovableproject.com';
-    const redirectUrl = `${origin}/reset-password`;
+    // Use the correct application URL for password reset
+    const redirectUrl = 'https://4fe7e394-08f7-4784-94c8-57df2d2f4a95.lovableproject.com/reset-password';
     
     console.log('Sending password reset email with redirect URL:', redirectUrl);
 
