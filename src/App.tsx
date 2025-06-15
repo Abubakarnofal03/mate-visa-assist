@@ -18,6 +18,7 @@ import VisaConsultant from "./pages/VisaConsultant";
 import SOP from "./pages/SOP";
 import Resume from "./pages/Resume";
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <TutorialProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route 
               path="/" 
               element={
