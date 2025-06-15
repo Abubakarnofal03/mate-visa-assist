@@ -35,5 +35,18 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     exclude: ['fsevents']
-  }
+  },
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['@radix-ui/react-slot', '@radix-ui/react-dialog'],
+        },
+      },
+    },
+  },
 }));
