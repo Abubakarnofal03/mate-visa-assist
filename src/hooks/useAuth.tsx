@@ -10,6 +10,7 @@ interface AuthContextType {
   userProfile: any | null;
   signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: any }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
+  signInWithGoogle: () => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   checkProfileAndRedirect: () => Promise<string | null>;
 }
@@ -106,6 +107,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return { error };
   };
 
+  const signInWithGoogle = async () => {
+    const redirectUrl = `${window.location.origin}/dashboard`;
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectUrl,
+      },
+    });
+    
+    return { error };
+  };
+
   const signOut = async () => {
     // Clear remember me preference on manual logout
     localStorage.removeItem('visamate-remember-me');
@@ -127,6 +141,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     userProfile,
     signIn,
     signUp,
+    signInWithGoogle,
     signOut,
     checkProfileAndRedirect,
   };
