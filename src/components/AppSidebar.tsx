@@ -39,12 +39,12 @@ const AppSidebar = () => {
   const isMobile = useIsMobile();
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: '/documents', label: 'Documents', icon: FileText },
-    { path: '/visa-progress', label: 'Visa Progress', icon: Calendar },
-    { path: '/sop', label: 'SOPs', icon: FileEdit },
-    { path: '/resume', label: 'Resume', icon: Briefcase },
-    { path: '/profile', label: 'Profile', icon: User },
+    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tutorial: 'dashboard' },
+    { path: '/documents', label: 'Documents', icon: FileText, tutorial: 'documents' },
+    { path: '/visa-progress', label: 'Visa Progress', icon: Calendar, tutorial: 'visa-progress' },
+    { path: '/sop', label: 'SOPs', icon: FileEdit, tutorial: 'sop' },
+    { path: '/resume', label: 'Resume', icon: Briefcase, tutorial: 'resume' },
+    { path: '/profile', label: 'Profile', icon: User, tutorial: 'profile' },
   ];
 
   const handleSignOut = async () => {
@@ -74,7 +74,7 @@ const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
+                <SidebarMenuItem key={item.path} data-tutorial={item.tutorial}>
                   <SidebarMenuButton 
                     asChild 
                     isActive={location.pathname === item.path}

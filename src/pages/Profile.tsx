@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useTutorial } from '@/hooks/useTutorial';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Camera } from 'lucide-react';
+import { User, Mail, Phone, Camera, Play } from 'lucide-react';
 
 interface ProfileData {
   id: string;
@@ -19,6 +20,7 @@ interface ProfileData {
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { startTutorial } = useTutorial();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -207,6 +209,14 @@ const Profile = () => {
     }
   };
 
+  const handleRestartTutorial = () => {
+    startTutorial();
+    toast({
+      title: "Tutorial Started",
+      description: "The app tutorial has been restarted. Follow the steps to learn about all features!",
+    });
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -359,6 +369,29 @@ const Profile = () => {
                 Update Password
               </Button>
             </form>
+          </CardContent>
+        </Card>
+
+        {/* Tutorial Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              App Tutorial
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              New to VisaMate? Take a guided tour to learn about all the features and get the most out of your visa application journey.
+            </p>
+            <Button 
+              onClick={handleRestartTutorial}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Play className="h-4 w-4" />
+              Restart Tutorial
+            </Button>
           </CardContent>
         </Card>
       </div>

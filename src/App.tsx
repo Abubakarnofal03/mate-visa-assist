@@ -6,7 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, ProtectedRoute } from "./hooks/useAuth";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { TutorialProvider } from "./hooks/useTutorial";
 import AppSidebar from "./components/AppSidebar";
+import Tutorial from "./components/Tutorial";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
@@ -25,6 +27,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
+            <TutorialProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route 
@@ -43,6 +46,7 @@ const App = () => (
                         </div>
                       </main>
                     </div>
+                    <Tutorial />
                   </SidebarProvider>
                 </ProtectedRoute>
               } 
@@ -185,6 +189,8 @@ const App = () => (
               </ProtectedRoute>
             } />
           </Routes>
+          <Tutorial />
+          </TutorialProvider>
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
