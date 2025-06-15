@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Plus, Sparkles, Download, Edit, Save, X } from 'lucide-react';
+import { FileText, Plus, Sparkles, Download, Edit, Save, X, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx';
 import { saveAs } from 'file-saver';
@@ -284,6 +284,32 @@ const SOP = () => {
     setEditedContent('');
   };
 
+  const deleteDocument = async (documentId: string, documentType: string) => {
+    try {
+      const { error } = await supabase
+        .from('sop_documents')
+        .delete()
+        .eq('id', documentId);
+
+      if (error) throw error;
+
+      // Update local state
+      setDocuments(docs => docs.filter(doc => doc.id !== documentId));
+
+      toast({
+        title: "Success",
+        description: `${documentType === 'sop' ? 'SOP' : 'Cover Letter'} deleted successfully`,
+      });
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete document",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -548,29 +574,40 @@ const SOP = () => {
                 </div>
                 
                 {editingDocumentId !== doc.id && (
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-between">
                     <Button
-                      variant="outline"
+                      variant="destructive"
                       size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(doc.generated_text);
-                        toast({
-                          title: "Copied!",
-                          description: "Document copied to clipboard",
-                        });
-                      }}
-                    >
-                      Copy to Clipboard
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => downloadAsWord(doc)}
+                      onClick={() => deleteDocument(doc.id, doc.document_type)}
                       className="flex items-center gap-2"
                     >
-                      <Download className="h-4 w-4" />
-                      Download Word
+                      <Trash2 className="h-4 w-4" />
+                      Delete
                     </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(doc.generated_text);
+                          toast({
+                            title: "Copied!",
+                            description: "Document copied to clipboard",
+                          });
+                        }}
+                      >
+                        Copy to Clipboard
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => downloadAsWord(doc)}
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download Word
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>
