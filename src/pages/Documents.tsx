@@ -393,32 +393,15 @@ const Documents = () => {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       {doc.file_url && (
-                        <>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              const urlParts = doc.file_url!.split('/');
-                              const filePath = urlParts[urlParts.length - 1];
-                              const fullPath = `${user?.id}/${filePath}`;
-                              const { data } = supabase.storage.from('documents').getPublicUrl(fullPath);
-                              window.open(data.publicUrl, '_blank');
-                            }}
-                            className="flex items-center gap-1"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => downloadDocument(doc.file_url!, doc.file_name || 'document')}
-                            className="flex items-center gap-1"
-                          >
-                            <Download className="h-4 w-4" />
-                            Download
-                          </Button>
-                        </>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadDocument(doc.file_url!, doc.file_name || 'document')}
+                          className="flex items-center gap-1"
+                        >
+                          <Download className="h-4 w-4" />
+                          Download
+                        </Button>
                       )}
                       <Button
                         variant="outline"
