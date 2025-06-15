@@ -105,9 +105,7 @@ const AppSidebar = () => {
           </div>
           
           {/* Action buttons */}
-          <div className="flex items-center justify-between">
-            <ThemeToggle />
-            
+          <div className="flex items-center justify-center">
             {/* Mobile-friendly logout button */}
             <Button 
               variant="outline" 
