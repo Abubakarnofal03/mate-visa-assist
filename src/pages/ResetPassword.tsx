@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Lock, CheckCircle } from 'lucide-react';
+import { Lock } from 'lucide-react';
 
 const ResetPassword = () => {
   const [password, setPassword] = useState('');
@@ -17,10 +18,12 @@ const ResetPassword = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the token in the URL
-    const token = searchParams.get('token');
+    // Check if we have the necessary URL parameters for password reset
+    const accessToken = searchParams.get('access_token');
+    const refreshToken = searchParams.get('refresh_token');
+    const type = searchParams.get('type');
     
-    if (!token) {
+    if (!accessToken || !refreshToken || type !== 'recovery') {
       toast({
         title: "Invalid reset link",
         description: "This password reset link is invalid or has expired.",
@@ -63,16 +66,9 @@ const ResetPassword = () => {
     setLoading(true);
     
     try {
-      const token = searchParams.get('token');
-      if (!token) {
-        throw new Error('No reset token found');
-      }
-
-      const { error } = await supabase.functions.invoke('verify-reset-token', {
-        body: { 
-          token: token,
-          newPassword: password 
-        }
+      // Use Supabase's built-in updateUser method to change password
+      const { error } = await supabase.auth.updateUser({
+        password: password
       });
 
       if (error) throw error;
@@ -82,14 +78,12 @@ const ResetPassword = () => {
         description: "Your password has been updated. You can now sign in with your new password.",
       });
 
-      // Clear the token from URL and redirect
+      // Redirect to auth page
       navigate('/auth');
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message?.includes('Invalid or expired') 
-          ? "This password reset link has expired or is invalid. Please request a new one." 
-          : error.message || "Failed to update password",
+        description: error.message || "Failed to update password",
         variant: "destructive",
       });
     } finally {
