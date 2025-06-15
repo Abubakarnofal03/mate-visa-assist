@@ -15,6 +15,7 @@ interface ProfileData {
   full_name: string | null;
   phone: string | null;
   avatar_url: string | null;
+  residence_country: string | null;
 }
 
 const Profile = () => {
@@ -29,6 +30,7 @@ const Profile = () => {
   // Form fields
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [residenceCountry, setResidenceCountry] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -52,6 +54,7 @@ const Profile = () => {
         setProfile(data);
         setFullName(data.full_name || '');
         setPhone(data.phone || '');
+        setResidenceCountry(data.residence_country || '');
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -76,6 +79,7 @@ const Profile = () => {
         user_id: user.id,
         full_name: fullName,
         phone: phone,
+        residence_country: residenceCountry,
       };
 
       const { error } = await supabase
@@ -185,6 +189,7 @@ const Profile = () => {
         .update({
           full_name: fullName,
           phone: phone,
+          residence_country: residenceCountry,
           avatar_url: publicUrl,
         })
         .eq('user_id', user.id);
@@ -331,9 +336,28 @@ const Profile = () => {
                   />
                 </div>
               </div>
-              <Button type="submit" disabled={updating}>
+              <div className="space-y-2">
+                <Label htmlFor="residenceCountry">Residence Country *</Label>
+                <Input
+                  id="residenceCountry"
+                  type="text"
+                  placeholder="Enter your current residence country (e.g., Pakistan)"
+                  value={residenceCountry}
+                  onChange={(e) => setResidenceCountry(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  This helps provide country-specific visa guidance
+                </p>
+              </div>
+              <Button type="submit" disabled={updating || !residenceCountry.trim()}>
                 {updating ? "Updating..." : "Update Profile"}
               </Button>
+              {!residenceCountry.trim() && (
+                <p className="text-xs text-destructive">
+                  Residence country is required for personalized visa guidance
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>

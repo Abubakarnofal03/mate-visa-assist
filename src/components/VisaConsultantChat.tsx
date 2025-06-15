@@ -268,7 +268,17 @@ const VisaConsultantChat = () => {
                         <div className="flex items-start gap-3">
                           <Bot className="h-6 w-6 mt-1 text-primary" />
                           <div className="flex-1 bg-primary/5 p-3 rounded-lg">
-                            <p className="text-sm whitespace-pre-wrap">{msg.response}</p>
+                            <div 
+                              className="text-sm prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-li:text-foreground"
+                              dangerouslySetInnerHTML={{
+                                __html: msg.response
+                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                  .replace(/### (.*?)\n/g, '<h3 class="text-base font-semibold mb-2 mt-4">$1</h3>')
+                                  .replace(/\n- /g, '<br/>• ')
+                                  .replace(/\n\n/g, '<br/><br/>')
+                                  .replace(/\n/g, '<br/>')
+                              }}
+                            />
                           </div>
                         </div>
                       </div>

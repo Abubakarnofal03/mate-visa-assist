@@ -43,7 +43,10 @@ serve(async (req) => {
     const contextData = {
       visaProgress,
       documents: documents.map(doc => ({ type: doc.document_type, completed: doc.is_completed })),
-      profile: profile ? { name: profile.full_name } : null,
+      profile: profile ? { 
+        name: profile.full_name,
+        residenceCountry: profile.residence_country 
+      } : null,
       sopDocuments: sopDocuments.map(sop => ({
         type: sop.document_type,
         country: sop.country,
@@ -80,6 +83,7 @@ serve(async (req) => {
 
 CURRENT USER CONTEXT:
 - User: ${profile?.full_name || 'Student'}
+- Residence Country: ${profile?.residence_country || 'Not specified'}
 - Visa Progress: ${progressPercentage}% complete (${completedSteps}/${totalSteps} steps)
 - Completed Steps: ${Object.entries(progressStats).filter(([_, completed]) => completed).map(([step, _]) => step).join(', ') || 'None'}
 - Pending Steps: ${Object.entries(progressStats).filter(([_, completed]) => !completed).map(([step, _]) => step).join(', ') || 'All complete'}
@@ -88,16 +92,18 @@ CURRENT USER CONTEXT:
 ${sopDocuments.length > 0 ? `- Application Details: ${sopDocuments.map(sop => `Applying to ${sop.country}${sop.university ? ` (${sop.university})` : ''}`).join(', ')}` : ''}
 
 GUIDELINES:
-1. Provide specific, actionable advice based on the user's current progress
+1. Provide specific, actionable advice based on the user's current progress and residence country
 2. Reference their completed and pending steps when relevant
 3. Offer step-by-step guidance for visa application processes
-4. Include country-specific requirements when discussing different destinations
+4. Include country-specific requirements based on their residence country and destination
 5. Suggest next immediate actions based on their current status
 6. Provide document checklists and timeline estimates when appropriate
 7. Be encouraging and supportive while being accurate and professional
 8. If asked about specific documents, explain requirements and formats
 9. Address common visa application concerns and troubleshooting
-10. Keep responses concise but comprehensive
+10. Consider embassy/consulate locations and procedures specific to their residence country
+11. Format your response with proper markdown: use **bold** for headings, bullet points for lists
+12. Structure your response with clear sections using ### for headings
 
 KNOWLEDGE BASE:
 - IELTS/TOEFL requirements and score guidelines
