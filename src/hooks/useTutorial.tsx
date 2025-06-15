@@ -85,8 +85,8 @@ export const TutorialProvider = ({ children }: { children: ReactNode }) => {
   const [steps] = useState(tutorialSteps);
 
   useEffect(() => {
-    // Check if user has completed tutorial and profile is complete
-    if (user && userProfile && userProfile.residence_country) {
+    // Start tutorial for new users regardless of profile completion
+    if (user && userProfile !== null) {
       const hasSeenTutorial = localStorage.getItem(`tutorial-completed-${user.id}`);
       if (!hasSeenTutorial) {
         // Small delay to let the app load
@@ -124,6 +124,11 @@ export const TutorialProvider = ({ children }: { children: ReactNode }) => {
     setIsActive(false);
     if (user) {
       localStorage.setItem(`tutorial-completed-${user.id}`, 'true');
+      
+      // After tutorial is complete, check if user needs to complete profile
+      if (userProfile && !userProfile.residence_country) {
+        window.location.href = '/profile';
+      }
     }
   };
 

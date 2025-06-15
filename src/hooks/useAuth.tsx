@@ -157,8 +157,9 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     if (user && userProfile !== null && !profileChecked) {
       setProfileChecked(true);
       
-      // Check if user needs to complete profile
-      if (!userProfile?.residence_country) {
+      // Check if user needs to complete profile, but only after tutorial is completed
+      const hasSeenTutorial = localStorage.getItem(`tutorial-completed-${user.id}`);
+      if (!userProfile?.residence_country && hasSeenTutorial) {
         navigate('/profile');
       }
     }
