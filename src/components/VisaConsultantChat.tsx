@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -167,13 +168,13 @@ const VisaConsultantChat = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 w-full max-w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
         <div className="flex items-center gap-2">
           <Bot className="h-6 w-6 text-primary" />
           <h2 className="text-xl font-semibold">Visa Consultant</h2>
         </div>
-        <Button onClick={startNewConversation} variant="outline" size="sm">
+        <Button onClick={startNewConversation} variant="outline" size="sm" className="w-full sm:w-auto">
           <MessageCircle className="h-4 w-4 mr-2" />
           New Chat
         </Button>
@@ -181,7 +182,7 @@ const VisaConsultantChat = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {/* Conversations Sidebar */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 min-w-0">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Chat History</CardTitle>
@@ -217,17 +218,17 @@ const VisaConsultantChat = () => {
         </div>
 
         {/* Chat Interface */}
-        <div className="lg:col-span-3">
-          <Card className="h-[600px] flex flex-col">
+        <div className="lg:col-span-3 min-w-0">
+          <Card className="h-[65vh] max-h-[700px] flex flex-col w-full max-w-full">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm text-muted-foreground">
                 Ask me anything about visa processes, requirements, or next steps
               </CardTitle>
             </CardHeader>
             
-            <CardContent className="flex-1 flex flex-col p-0">
+            <CardContent className="flex-1 flex flex-col p-0 min-w-0">
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
+              <ScrollArea className="flex-1 p-4 min-w-0">
                 {messages.length === 0 ? (
                   <div className="space-y-4">
                     <div className="text-center text-muted-foreground">
@@ -259,7 +260,7 @@ const VisaConsultantChat = () => {
                         {/* User Message */}
                         <div className="flex items-start gap-3">
                           <User className="h-6 w-6 mt-1 text-muted-foreground" />
-                          <div className="flex-1 bg-muted p-3 rounded-lg">
+                          <div className="flex-1 bg-muted p-3 rounded-lg break-words max-w-full overflow-x-auto">
                             <p className="text-sm">{msg.message}</p>
                           </div>
                         </div>
@@ -267,9 +268,13 @@ const VisaConsultantChat = () => {
                         {/* AI Response */}
                         <div className="flex items-start gap-3">
                           <Bot className="h-6 w-6 mt-1 text-primary" />
-                          <div className="flex-1 bg-primary/5 p-3 rounded-lg">
+                          <div
+                            className="flex-1 bg-primary/5 p-3 rounded-lg break-words max-w-full overflow-x-auto text-pretty"
+                            style={{ wordBreak: 'break-word', maxWidth: '100%' }}
+                          >
                             <div 
-                              className="text-sm prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-li:text-foreground"
+                              className="text-sm prose prose-sm max-w-full prose-headings:font-semibold prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-ul:text-foreground prose-li:text-foreground"
+                              style={{ whiteSpace: "pre-wrap", wordBreak: 'break-word' }}
                               dangerouslySetInnerHTML={{
                                 __html: msg.response
                                   .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -302,19 +307,20 @@ const VisaConsultantChat = () => {
 
               {/* Input */}
               <div className="p-4 border-t">
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Input
                     value={currentMessage}
                     onChange={(e) => setCurrentMessage(e.target.value)}
                     placeholder="Ask about visa requirements, next steps, or any questions..."
                     onKeyPress={handleKeyPress}
                     disabled={isLoading}
-                    className="flex-1"
+                    className="flex-1 min-w-0"
                   />
                   <Button 
                     onClick={() => sendMessage()} 
                     disabled={!currentMessage.trim() || isLoading}
                     size="sm"
+                    className="w-full sm:w-auto"
                   >
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -333,3 +339,4 @@ const VisaConsultantChat = () => {
 };
 
 export default VisaConsultantChat;
+
