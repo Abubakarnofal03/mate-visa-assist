@@ -1,1 +1,1 @@
-www.visamate.org
+www.visamate.pro
