@@ -235,11 +235,11 @@ const Resume = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-background via-background to-secondary/5 min-h-screen">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-br from-background via-background to-secondary/5 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">Resume Manager</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Resume Manager</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Upload and analyze your resumes with AI-powered suggestions
           </p>
         </div>
@@ -317,21 +317,23 @@ const Resume = () => {
           resumes.map((resume) => (
             <Card key={resume.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    {resume.title}
+                    <FileText className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">{resume.title}</span>
                   </CardTitle>
-                  <div className="flex items-center gap-2">
-                    {resume.ai_rating && (
-                      <Badge variant="secondary" className="gap-1">
-                        <Star className="h-3 w-3" />
-                        {resume.ai_rating}/10
-                      </Badge>
-                    )}
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(resume.created_at).toLocaleDateString()}
-                    </span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      {resume.ai_rating && (
+                        <Badge variant="secondary" className="gap-1">
+                          <Star className="h-3 w-3" />
+                          {resume.ai_rating}/10
+                        </Badge>
+                      )}
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        {new Date(resume.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
@@ -340,7 +342,7 @@ const Resume = () => {
                         className="flex items-center gap-1"
                       >
                         <Download className="h-4 w-4" />
-                        Download
+                        <span className="hidden sm:inline">Download</span>
                       </Button>
                       <Button
                         variant="ghost"
@@ -358,7 +360,7 @@ const Resume = () => {
                 {resume.parsed_content && (
                   <div>
                     <h4 className="font-medium mb-2">Extracted Content (Preview):</h4>
-                    <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded max-h-32 overflow-y-auto">
+                    <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded max-h-32 overflow-y-auto break-words">
                       {resume.parsed_content.substring(0, 500)}
                       {resume.parsed_content.length > 500 && '...'}
                     </p>
@@ -368,7 +370,7 @@ const Resume = () => {
                   <div>
                     <h4 className="font-medium mb-2">AI Analysis & Suggestions:</h4>
                     <div 
-                      className="bg-background border rounded p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none [&_h3]:font-bold [&_h3]:text-lg [&_h3]:mb-2 [&_h3]:mt-4 [&_h3:first-child]:mt-0"
+                      className="bg-background border rounded p-3 sm:p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none break-words [&_h3]:font-bold [&_h3]:text-lg [&_h3]:mb-2 [&_h3]:mt-4 [&_h3:first-child]:mt-0"
                       dangerouslySetInnerHTML={{ 
                         __html: resume.ai_suggestions 
                       }}

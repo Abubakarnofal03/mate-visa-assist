@@ -327,11 +327,11 @@ const SOP = () => {
   }
 
   return (
-    <div className="p-6 space-y-6 bg-gradient-to-br from-background via-background to-secondary/5 min-h-screen">
-      <div className="flex items-center justify-between">
+    <div className="p-4 sm:p-6 space-y-6 bg-gradient-to-br from-background via-background to-secondary/5 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">SOPs & Cover Letters</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">SOPs & Cover Letters</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Generate AI-powered statements and cover letters for your applications
           </p>
         </div>
@@ -358,7 +358,7 @@ const SOP = () => {
                 <TabsTrigger value="cover_letter">Cover Letter</TabsTrigger>
               </TabsList>
               <TabsContent value="sop" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
                     <Input
@@ -408,7 +408,7 @@ const SOP = () => {
                 </div>
               </TabsContent>
               <TabsContent value="cover_letter" className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="country-cl">Country/Location</Label>
                     <Input
@@ -490,31 +490,31 @@ const SOP = () => {
           documents.map((doc) => (
             <Card key={doc.id} className="hover:shadow-md transition-shadow">
               <CardHeader>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    {doc.document_type === 'sop' ? 'Statement of Purpose' : 'Cover Letter'}
+                    <FileText className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">{doc.document_type === 'sop' ? 'Statement of Purpose' : 'Cover Letter'}</span>
                   </CardTitle>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                     <Badge variant="secondary">
                       {doc.document_type === 'sop' ? 'SOP' : 'Cover Letter'}
                     </Badge>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">
                       {new Date(doc.created_at).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
                 {(doc.country || doc.university) && (
-                  <div className="flex gap-2 text-sm text-muted-foreground">
-                    {doc.country && <span>📍 {doc.country}</span>}
-                    {doc.university && <span>🏫 {doc.university}</span>}
+                  <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
+                    {doc.country && <span className="break-all">📍 {doc.country}</span>}
+                    {doc.university && <span className="break-all">🏫 {doc.university}</span>}
                   </div>
                 )}
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
                   <h4 className="font-medium mb-2">Your Input:</h4>
-                  <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded">
+                  <p className="text-sm text-muted-foreground bg-secondary/50 p-3 rounded break-words">
                     {doc.prompt_input}
                   </p>
                 </div>
@@ -565,7 +565,7 @@ const SOP = () => {
                   ) : (
                     <div 
                       id={`${doc.id}-content`}
-                      className="bg-background border rounded p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none"
+                      className="bg-background border rounded p-3 sm:p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none break-words"
                       dangerouslySetInnerHTML={{ 
                         __html: doc.generated_text || 'No content available' 
                       }}
@@ -574,17 +574,17 @@ const SOP = () => {
                 </div>
                 
                 {editingDocumentId !== doc.id && (
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row justify-between gap-3">
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => deleteDocument(doc.id, doc.document_type)}
-                      className="flex items-center gap-2"
+                      className="flex items-center gap-2 sm:w-auto"
                     >
                       <Trash2 className="h-4 w-4" />
                       Delete
                     </Button>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button
                         variant="outline"
                         size="sm"
@@ -595,17 +595,20 @@ const SOP = () => {
                             description: "Document copied to clipboard",
                           });
                         }}
+                        className="sm:w-auto"
                       >
-                        Copy to Clipboard
+                        <span className="sm:hidden">Copy</span>
+                        <span className="hidden sm:inline">Copy to Clipboard</span>
                       </Button>
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => downloadAsWord(doc)}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2 sm:w-auto"
                       >
                         <Download className="h-4 w-4" />
-                        Download Word
+                        <span className="hidden sm:inline">Download Word</span>
+                        <span className="sm:hidden">Download</span>
                       </Button>
                     </div>
                   </div>
