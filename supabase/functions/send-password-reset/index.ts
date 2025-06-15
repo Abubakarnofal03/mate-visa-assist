@@ -41,12 +41,11 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Simple rate limiting - get client IP safely
+    // Get client IP for rate limiting
     const forwardedFor = req.headers.get('x-forwarded-for');
     const realIP = req.headers.get('x-real-ip');
     let clientIP = 'unknown';
     
-    // Handle comma-separated IPs from x-forwarded-for
     if (forwardedFor) {
       clientIP = forwardedFor.split(',')[0].trim();
     } else if (realIP) {
@@ -55,7 +54,9 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Client IP for rate limiting:', clientIP);
 
-    // Check rate limits with proper error handling
+    // Check rate limits - but don't block if there are errors
+    let shouldBlock = false;
+    
     try {
       const [emailRateLimit, ipRateLimit] = await Promise.all([
         supabase.rpc('check_reset_rate_limit', { p_identifier: email }),
@@ -69,31 +70,28 @@ const handler = async (req: Request): Promise<Response> => {
         ipError: ipRateLimit.error
       });
 
-      // If there are database errors, log them but don't block the request
-      if (emailRateLimit.error || ipRateLimit.error) {
-        console.error('Rate limit check had errors, proceeding anyway:', {
-          emailError: emailRateLimit.error,
-          ipError: ipRateLimit.error
-        });
-      }
-
-      // Only block if we successfully checked and both are rate limited
-      if (!emailRateLimit.error && !ipRateLimit.error && 
-          !emailRateLimit.data && !ipRateLimit.data) {
-        return new Response(JSON.stringify({ 
-          error: 'Too many reset attempts. Please try again later.' 
-        }), {
-          status: 429,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        });
+      // Only block if BOTH rate limit checks succeed AND BOTH return false
+      if (!emailRateLimit.error && !ipRateLimit.error) {
+        if (emailRateLimit.data === false && ipRateLimit.data === false) {
+          shouldBlock = true;
+        }
       }
     } catch (rateLimitError) {
-      console.error('Rate limiting failed:', rateLimitError);
-      // Continue with password reset even if rate limiting fails
+      console.error('Rate limiting failed, allowing request to proceed:', rateLimitError);
+    }
+
+    if (shouldBlock) {
+      return new Response(JSON.stringify({ 
+        error: 'Too many reset attempts. Please try again later.' 
+      }), {
+        status: 429,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Use Supabase's built-in password reset functionality
-    const redirectUrl = `${req.headers.get('origin') || 'https://4fe7e394-08f7-4784-94c8-57df2d2f4a95.lovableproject.com'}/reset-password`;
+    const origin = req.headers.get('origin') || 'https://4fe7e394-08f7-4784-94c8-57df2d2f4a95.lovableproject.com';
+    const redirectUrl = `${origin}/reset-password`;
     
     console.log('Sending password reset email with redirect URL:', redirectUrl);
 
@@ -103,17 +101,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (error) {
       console.error('Error sending password reset:', error);
-      // Return a generic success message to prevent email enumeration
-      return new Response(JSON.stringify({ 
-        message: 'If an account with that email exists, a password reset link has been sent.' 
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
+    } else {
+      console.log('Password reset email sent successfully:', data);
     }
 
-    console.log('Password reset email sent successfully:', data);
-
+    // Always return success to prevent email enumeration
     return new Response(JSON.stringify({ 
       message: 'If an account with that email exists, a password reset link has been sent.' 
     }), {
