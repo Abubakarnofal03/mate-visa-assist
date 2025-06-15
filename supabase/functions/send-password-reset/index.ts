@@ -70,9 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
         ipError: ipRateLimit.error
       });
 
-      // Only block if BOTH rate limit checks succeed AND BOTH return false
+      // Only block if rate limit checks succeed AND indicate blocking should happen
       if (!emailRateLimit.error && !ipRateLimit.error) {
-        if (emailRateLimit.data === false && ipRateLimit.data === false) {
+        if (emailRateLimit.data === false || ipRateLimit.data === false) {
           shouldBlock = true;
         }
       }
@@ -89,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Use the correct application URL for password reset
+    // Use the production application URL for password reset
     const redirectUrl = 'https://4fe7e394-08f7-4784-94c8-57df2d2f4a95.lovableproject.com/reset-password';
     
     console.log('Sending password reset email with redirect URL:', redirectUrl);
