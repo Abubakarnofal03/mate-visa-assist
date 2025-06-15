@@ -74,16 +74,21 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Check if user exists
-    const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(email);
+    // Check if user exists by looking in the profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('user_id', `(SELECT id FROM auth.users WHERE email = '${email}')`)
+      .single();
     
-    console.log('User lookup result:', { found: !!userData.user, error: userError });
+    console.log('User lookup result:', { found: !!profileData, error: profileError });
 
-    if (userError || !userData.user) {
-      // Always return success to prevent email enumeration
-      return new Response(JSON.stringify({ 
-        message: 'If an account with that email exists, a password reset link has been sent.' 
-      }), {
+    // For security, always return the same message regardless of whether user exists
+    const successMessage = 'If an account with that email exists, a password reset link has been sent.';
+
+    // If no user found, still return success to prevent email enumeration
+    if (profileError || !profileData) {
+      return new Response(JSON.stringify({ message: successMessage }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
@@ -94,13 +99,13 @@ const handler = async (req: Request): Promise<Response> => {
     const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    console.log('Generated reset token for user:', userData.user.id);
+    console.log('Generated reset token for user:', profileData.user_id);
 
     // Store reset token
     const { error: tokenError } = await supabase
       .from('password_reset_tokens')
       .insert({
-        user_id: userData.user.id,
+        user_id: profileData.user_id,
         token_hash: tokenHash,
         expires_at: expiresAt.toISOString(),
         ip_address: clientIP,
@@ -129,61 +134,18 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: 'Reset your VisaMate password',
       html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Reset Your Password - VisaMate</title>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f6f9fc;">
-          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600;">VisaMate</h1>
-              <p style="color: #e2e8f0; margin: 10px 0 0 0; font-size: 16px;">Your visa application management system</p>
-            </div>
-            
-            <!-- Content -->
-            <div style="padding: 40px 20px;">
-              <h2 style="color: #1a202c; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">Reset Your Password</h2>
-              
-              <p style="color: #4a5568; margin: 0 0 20px 0; font-size: 16px; line-height: 1.5;">
-                We received a request to reset your password for your VisaMate account. Click the button below to create a new password:
-              </p>
-              
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${resetUrl}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 14px 0 rgba(102, 126, 234, 0.25);">
-                  Reset My Password
-                </a>
-              </div>
-              
-              <p style="color: #718096; margin: 20px 0; font-size: 14px; line-height: 1.5;">
-                This link will expire in 15 minutes for security reasons. If you didn't request this password reset, you can safely ignore this email.
-              </p>
-              
-              <div style="background-color: #f7fafc; border-left: 4px solid #4299e1; padding: 16px; margin: 20px 0;">
-                <p style="color: #2d3748; margin: 0; font-size: 14px;">
-                  <strong>Security tip:</strong> If you're having trouble clicking the button, copy and paste this link into your browser:
-                </p>
-                <p style="color: #4299e1; margin: 10px 0 0 0; font-size: 14px; word-break: break-all;">
-                  ${resetUrl}
-                </p>
-              </div>
-            </div>
-            
-            <!-- Footer -->
-            <div style="background-color: #f7fafc; padding: 30px 20px; text-align: center; border-top: 1px solid #e2e8f0;">
-              <p style="color: #718096; margin: 0; font-size: 14px;">
-                © 2024 VisaMate. All rights reserved.
-              </p>
-              <p style="color: #a0aec0; margin: 10px 0 0 0; font-size: 12px;">
-                This email was sent to ${email}. If you have questions, please contact our support team.
-              </p>
-            </div>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Reset Your Password</h2>
+          <p>We received a request to reset your password for your VisaMate account.</p>
+          <p>Click the button below to reset your password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #667eea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
           </div>
-        </body>
-        </html>
+          <p>This link will expire in 15 minutes.</p>
+          <p>If you didn't request this password reset, you can safely ignore this email.</p>
+          <hr>
+          <p style="color: #666; font-size: 12px;">If you're having trouble clicking the button, copy and paste this link into your browser: ${resetUrl}</p>
+        </div>
       `,
     });
 
@@ -197,9 +159,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Password reset email sent successfully:', emailResponse);
 
-    return new Response(JSON.stringify({ 
-      message: 'If an account with that email exists, a password reset link has been sent.' 
-    }), {
+    return new Response(JSON.stringify({ message: successMessage }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
