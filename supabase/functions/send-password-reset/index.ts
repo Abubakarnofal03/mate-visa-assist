@@ -13,7 +13,7 @@ interface PasswordResetRequest {
 
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+  Deno.env.get('SUPABASE_ANON_KEY') ?? ''
 );
 
 const handler = async (req: Request): Promise<Response> => {
@@ -41,50 +41,69 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Get client IP for basic rate limiting
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    // Simple rate limiting - get client IP safely
+    const forwardedFor = req.headers.get('x-forwarded-for');
+    const realIP = req.headers.get('x-real-ip');
+    let clientIP = 'unknown';
     
-    // Check rate limits for both email and IP
-    const [emailRateLimit, ipRateLimit] = await Promise.all([
-      supabase.rpc('check_reset_rate_limit', { p_identifier: email }),
-      supabase.rpc('check_reset_rate_limit', { p_identifier: clientIP })
-    ]);
-
-    console.log('Rate limit check results:', { emailRateLimit: emailRateLimit.data, ipRateLimit: ipRateLimit.data });
-
-    // Block only if BOTH email and IP are rate limited, or if there's an error with the checks
-    if (emailRateLimit.error || ipRateLimit.error) {
-      console.error('Rate limit check errors:', { emailError: emailRateLimit.error, ipError: ipRateLimit.error });
-      return new Response(JSON.stringify({ 
-        error: 'Service temporarily unavailable. Please try again later.' 
-      }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
+    // Handle comma-separated IPs from x-forwarded-for
+    if (forwardedFor) {
+      clientIP = forwardedFor.split(',')[0].trim();
+    } else if (realIP) {
+      clientIP = realIP.trim();
     }
 
-    // Only block if both email AND IP are rate limited (both return false)
-    if (!emailRateLimit.data && !ipRateLimit.data) {
-      return new Response(JSON.stringify({ 
-        error: 'Too many reset attempts. Please try again later.' 
-      }), {
-        status: 429,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    console.log('Client IP for rate limiting:', clientIP);
+
+    // Check rate limits with proper error handling
+    try {
+      const [emailRateLimit, ipRateLimit] = await Promise.all([
+        supabase.rpc('check_reset_rate_limit', { p_identifier: email }),
+        supabase.rpc('check_reset_rate_limit', { p_identifier: clientIP })
+      ]);
+
+      console.log('Rate limit check results:', { 
+        emailAllowed: emailRateLimit.data, 
+        ipAllowed: ipRateLimit.data,
+        emailError: emailRateLimit.error,
+        ipError: ipRateLimit.error
       });
+
+      // If there are database errors, log them but don't block the request
+      if (emailRateLimit.error || ipRateLimit.error) {
+        console.error('Rate limit check had errors, proceeding anyway:', {
+          emailError: emailRateLimit.error,
+          ipError: ipRateLimit.error
+        });
+      }
+
+      // Only block if we successfully checked and both are rate limited
+      if (!emailRateLimit.error && !ipRateLimit.error && 
+          !emailRateLimit.data && !ipRateLimit.data) {
+        return new Response(JSON.stringify({ 
+          error: 'Too many reset attempts. Please try again later.' 
+        }), {
+          status: 429,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+    } catch (rateLimitError) {
+      console.error('Rate limiting failed:', rateLimitError);
+      // Continue with password reset even if rate limiting fails
     }
 
     // Use Supabase's built-in password reset functionality
-    const redirectUrl = `${req.headers.get('origin') || 'https://your-app.com'}/reset-password`;
+    const redirectUrl = `${req.headers.get('origin') || 'https://4fe7e394-08f7-4784-94c8-57df2d2f4a95.lovableproject.com'}/reset-password`;
     
-    console.log('Sending password reset email using Supabase auth...');
+    console.log('Sending password reset email with redirect URL:', redirectUrl);
 
-    const { error } = await supabase.auth.admin.resetPasswordForEmail(email, {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl,
     });
 
     if (error) {
       console.error('Error sending password reset:', error);
-      // Still return success message to prevent email enumeration
+      // Return a generic success message to prevent email enumeration
       return new Response(JSON.stringify({ 
         message: 'If an account with that email exists, a password reset link has been sent.' 
       }), {
@@ -93,7 +112,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    console.log('Password reset email sent successfully via Supabase auth');
+    console.log('Password reset email sent successfully:', data);
 
     return new Response(JSON.stringify({ 
       message: 'If an account with that email exists, a password reset link has been sent.' 
