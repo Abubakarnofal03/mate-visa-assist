@@ -22,21 +22,30 @@ const Tutorial = () => {
         
         // Calculate position for tutorial card
         const rect = element.getBoundingClientRect();
-        const cardWidth = 400;
-        const cardHeight = 300;
+        const isMobile = window.innerWidth < 768;
+        const cardWidth = isMobile ? Math.min(350, window.innerWidth - 20) : 400;
+        const cardHeight = isMobile ? 280 : 300;
         
         let top = rect.bottom + 20;
         let left = rect.left + (rect.width / 2) - (cardWidth / 2);
         
-        // Adjust if card goes off-screen
-        if (left + cardWidth > window.innerWidth) {
-          left = window.innerWidth - cardWidth - 20;
-        }
-        if (left < 20) {
-          left = 20;
-        }
-        if (top + cardHeight > window.innerHeight) {
-          top = rect.top - cardHeight - 20;
+        // Mobile-specific positioning
+        if (isMobile) {
+          left = 10; // Always 10px from left on mobile
+          if (top + cardHeight > window.innerHeight - 20) {
+            top = Math.max(rect.top - cardHeight - 20, 10);
+          }
+        } else {
+          // Desktop positioning
+          if (left + cardWidth > window.innerWidth) {
+            left = window.innerWidth - cardWidth - 20;
+          }
+          if (left < 20) {
+            left = 20;
+          }
+          if (top + cardHeight > window.innerHeight) {
+            top = rect.top - cardHeight - 20;
+          }
         }
         
         setPosition({ top, left });
