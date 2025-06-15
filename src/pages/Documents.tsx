@@ -226,11 +226,18 @@ const Documents = () => {
 
   const downloadDocument = async (fileUrl: string, fileName: string) => {
     try {
-      const response = await fetch(fileUrl);
-      if (!response.ok) throw new Error('Download failed');
+      // Extract the file path from the stored URL and get proper public URL
+      const urlParts = fileUrl.split('/');
+      const filePath = urlParts[urlParts.length - 1];
+      const fullPath = `${user?.id}/${filePath}`;
       
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const { data } = await supabase.storage
+        .from('documents')
+        .download(fullPath);
+      
+      if (!data) throw new Error('Download failed');
+      
+      const url = window.URL.createObjectURL(data);
       const link = document.createElement('a');
       link.href = url;
       link.download = fileName;
@@ -390,7 +397,13 @@ const Documents = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => window.open(doc.file_url!, '_blank')}
+                            onClick={() => {
+                              const urlParts = doc.file_url!.split('/');
+                              const filePath = urlParts[urlParts.length - 1];
+                              const fullPath = `${user?.id}/${filePath}`;
+                              const { data } = supabase.storage.from('documents').getPublicUrl(fullPath);
+                              window.open(data.publicUrl, '_blank');
+                            }}
                             className="flex items-center gap-1"
                           >
                             <Eye className="h-4 w-4" />
