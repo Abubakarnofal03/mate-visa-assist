@@ -1,3 +1,4 @@
+
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -29,7 +30,9 @@ import {
   User, 
   LogOut,
   Briefcase,
-  Bot
+  Bot,
+  Mail,
+  Coffee
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -89,6 +92,42 @@ const AppSidebar = () => {
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Contact Us Section */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <div className="px-2 py-4 space-y-3">
+              {/* Motivational Quote */}
+              <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                <div className="flex items-start space-x-2">
+                  <Coffee className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-muted-foreground italic leading-relaxed">
+                    "Your visa journey starts with a single step. Stay focused, stay motivated!"
+                  </p>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="p-3 bg-muted/50 rounded-lg border">
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">Contact Developer</span>
+                  </div>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <p className="font-medium text-foreground">M. Abubakar Nofal</p>
+                    <a 
+                      href="mailto:visamateservice@gmail.com" 
+                      className="text-primary hover:underline block"
+                    >
+                      visamateservice@gmail.com
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
