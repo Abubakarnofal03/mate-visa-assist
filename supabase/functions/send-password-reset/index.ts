@@ -52,7 +52,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Rate limit check results:', { emailRateLimit: emailRateLimit.data, ipRateLimit: ipRateLimit.data });
 
-    if (!emailRateLimit.data || !ipRateLimit.data) {
+    // Block only if BOTH email and IP are rate limited, or if there's an error with the checks
+    if (emailRateLimit.error || ipRateLimit.error) {
+      console.error('Rate limit check errors:', { emailError: emailRateLimit.error, ipError: ipRateLimit.error });
+      return new Response(JSON.stringify({ 
+        error: 'Service temporarily unavailable. Please try again later.' 
+      }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
+    // Only block if both email AND IP are rate limited (both return false)
+    if (!emailRateLimit.data && !ipRateLimit.data) {
       return new Response(JSON.stringify({ 
         error: 'Too many reset attempts. Please try again later.' 
       }), {
