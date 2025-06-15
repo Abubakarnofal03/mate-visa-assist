@@ -1,4 +1,5 @@
 
+
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -118,12 +119,9 @@ const AppSidebar = () => {
                   </div>
                   <div className="space-y-1 text-xs text-muted-foreground">
                     <p className="font-medium text-foreground">M. Abubakar Nofal</p>
-                    <a 
-                      href="mailto:visamateservice@gmail.com" 
-                      className="text-primary hover:underline block"
-                    >
-                      visamateservice@gmail.com
-                    </a>
+                    <p className="text-primary">
+                      email at : visamateservice@gmail.com
+                    </p>
                   </div>
                 </div>
               </div>
@@ -165,3 +163,4 @@ const AppSidebar = () => {
 };
 
 export default AppSidebar;
+
