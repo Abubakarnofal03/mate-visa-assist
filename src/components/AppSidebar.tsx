@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
@@ -18,6 +19,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { 
   LayoutDashboard, 
@@ -33,6 +35,8 @@ import { ThemeToggle } from './ThemeToggle';
 const AppSidebar = () => {
   const { user, signOut } = useAuth();
   const location = useLocation();
+  const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -47,11 +51,17 @@ const AppSidebar = () => {
     await signOut();
   };
 
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center justify-center py-4">
-          <Link to="/dashboard" className="flex-shrink-0">
+          <Link to="/dashboard" className="flex-shrink-0" onClick={handleNavClick}>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
               VisaMate
             </h1>
@@ -69,7 +79,7 @@ const AppSidebar = () => {
                     asChild 
                     isActive={location.pathname === item.path}
                   >
-                    <Link to={item.path}>
+                    <Link to={item.path} onClick={handleNavClick}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
                     </Link>
