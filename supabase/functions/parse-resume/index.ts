@@ -104,21 +104,30 @@ serve(async (req) => {
 
     // Analyze resume with Groq API
     const analysisPrompt = `
-Analyze this resume and provide:
-1. ATS (Applicant Tracking System) optimization suggestions
-2. Content improvements
-3. Format and structure recommendations
-4. Missing sections or skills
-5. A rating out of 10 with justification
+You are a senior technical recruiter with deep experience reviewing software developer resumes.
 
-Please structure your response in HTML format with:
-- <h3> tags for main sections
-- <p> tags for paragraphs
-- <ul> and <li> for lists
-- <strong> for emphasis
-- Include a clear rating section with score out of 10
+Below is a resume belonging to "${title}".
 
-Resume content:
+First, **read the resume fully**. Then:
+
+1. Decide whether the resume actually *needs improvement* or not.
+   - If it's already solid and professional, say so clearly.
+   - If it's decent but could be improved, mention only the most **useful 2-3 suggestions**.
+   - If it's weak, give constructive, direct, no-bullshit feedback.
+
+2. **Tailor your feedback** based on resume content — not generic fluff. Base it on real experience, projects, and tech mentioned.
+
+3. Give:
+   - <h3>Summary</h3> (is the resume good or needs work)
+   - <h3>Strengths</h3>
+   - <h3>Suggestions (only if needed)</h3>
+   - <h3>Final Rating</h3> with a score out of 10
+
+Use <p> for text, <ul><li> for points, and <strong> for emphasis. Avoid padding and repeating yourself.
+
+Resume Owner: ${title}
+
+Resume Content:
 ${truncatedContent}
 `;
 
