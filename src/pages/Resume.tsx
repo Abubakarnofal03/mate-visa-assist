@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { FileText, Plus, Upload, Star, Trash2 } from 'lucide-react';
+import { FileText, Plus, Upload, Star, Trash2, Download } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -149,6 +149,37 @@ const Resume = () => {
       });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const downloadResume = async (fileUrl: string, title: string) => {
+    try {
+      const { data } = await supabase.storage
+        .from('resumes')
+        .download(fileUrl);
+      
+      if (!data) throw new Error('Download failed');
+      
+      const url = window.URL.createObjectURL(data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${title}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Resume downloaded successfully",
+      });
+    } catch (error) {
+      console.error('Error downloading resume:', error);
+      toast({
+        title: "Error",
+        description: "Failed to download resume",
+        variant: "destructive",
+      });
     }
   };
 
@@ -301,14 +332,25 @@ const Resume = () => {
                     <span className="text-sm text-muted-foreground">
                       {new Date(resume.created_at).toLocaleDateString()}
                     </span>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => deleteResume(resume.id, resume.file_url)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => downloadResume(resume.file_url, resume.title)}
+                        className="flex items-center gap-1"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteResume(resume.id, resume.file_url)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardHeader>
@@ -326,7 +368,7 @@ const Resume = () => {
                   <div>
                     <h4 className="font-medium mb-2">AI Analysis & Suggestions:</h4>
                     <div 
-                      className="bg-background border rounded p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none"
+                      className="bg-background border rounded p-4 max-h-96 overflow-y-auto prose prose-slate max-w-none [&_h3]:font-bold [&_h3]:text-lg [&_h3]:mb-2 [&_h3]:mt-4 [&_h3:first-child]:mt-0"
                       dangerouslySetInnerHTML={{ 
                         __html: resume.ai_suggestions 
                       }}

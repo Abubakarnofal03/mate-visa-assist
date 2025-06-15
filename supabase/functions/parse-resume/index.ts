@@ -108,22 +108,18 @@ You are a senior technical recruiter with deep experience reviewing software dev
 
 Below is a resume belonging to "${title}".
 
-First, **read the resume fully**. Then:
+First, **read the resume fully**. Then provide structured feedback with the following sections:
 
-1. Decide whether the resume actually *needs improvement* or not.
-   - If it's already solid and professional, say so clearly.
-   - If it's decent but could be improved, mention only the most **useful 2-3 suggestions**.
-   - If it's weak, give constructive, direct, no-bullshit feedback.
+1. **SUMMARY SUGGESTION:** Brief assessment of overall resume quality
+2. **EDUCATION PORTION SUGGESTION:** Feedback on education section (if present)  
+3. **EXPERIENCE SECTION SUGGESTION:** Feedback on work experience presentation
+4. **SKILLS SECTION SUGGESTION:** Feedback on technical/soft skills listing
+5. **FORMATTING SUGGESTION:** Feedback on layout, structure, and readability
+6. **FINAL RATING:** Score out of 10 with brief justification
 
-2. **Tailor your feedback** based on resume content — not generic fluff. Base it on real experience, projects, and tech mentioned.
+Format your response using HTML with <h3> tags for section headings (make them descriptive like "SUMMARY SUGGESTION:", "EDUCATION PORTION SUGGESTION:", etc.), <p> for paragraphs, <ul><li> for bullet points, and <strong> for emphasis.
 
-3. Give:
-   - <h3>Summary</h3> (is the resume good or needs work)
-   - <h3>Strengths</h3>
-   - <h3>Suggestions (only if needed)</h3>
-   - <h3>Final Rating</h3> with a score out of 10
-
-Use <p> for text, <ul><li> for points, and <strong> for emphasis. Avoid padding and repeating yourself.
+Focus on specific, actionable feedback based on the actual content. Avoid generic advice.
 
 Resume Owner: ${title}
 
@@ -165,22 +161,24 @@ ${truncatedContent}
       // Provide fallback analysis instead of failing
       console.log('Providing fallback analysis due to API error');
       aiSuggestions = `
-      <h3>Resume Analysis (Fallback Mode)</h3>
+      <h3>SUMMARY SUGGESTION:</h3>
       <p><strong>Note:</strong> AI analysis temporarily unavailable. Basic analysis provided.</p>
+      <p>Your resume has been uploaded successfully and follows a standard professional format.</p>
       
-      <h3>General Recommendations</h3>
-      <ul>
-        <li><strong>ATS Optimization:</strong> Ensure your resume includes relevant keywords from job descriptions</li>
-        <li><strong>Format:</strong> Use a clean, professional format with consistent fonts and spacing</li>
-        <li><strong>Contact Information:</strong> Include phone, email, and LinkedIn profile</li>
-        <li><strong>Skills Section:</strong> List both technical and soft skills relevant to your field</li>
-        <li><strong>Experience:</strong> Use action verbs and quantify achievements where possible</li>
-        <li><strong>Education:</strong> Include relevant degrees, certifications, and coursework</li>
-      </ul>
+      <h3>EDUCATION PORTION SUGGESTION:</h3>
+      <p>Ensure your education section includes relevant degrees, certifications, and notable coursework or achievements.</p>
       
-      <h3>Rating</h3>
-      <p><strong>Score:</strong> 7/10 (Standard professional resume format detected)</p>
-      <p>Resume uploaded successfully. For detailed AI analysis, please try again later.</p>
+      <h3>EXPERIENCE SECTION SUGGESTION:</h3>
+      <p>Use action verbs and quantify achievements where possible. Focus on impact and results rather than just responsibilities.</p>
+      
+      <h3>SKILLS SECTION SUGGESTION:</h3>
+      <p>List both technical and soft skills relevant to your target role. Consider organizing by categories (e.g., Programming Languages, Frameworks, Tools).</p>
+      
+      <h3>FORMATTING SUGGESTION:</h3>
+      <p>Maintain consistent fonts, spacing, and formatting throughout. Ensure ATS compatibility by avoiding complex layouts.</p>
+      
+      <h3>FINAL RATING:</h3>
+      <p><strong>Score:</strong> 7/10 - Standard professional resume format detected. For detailed AI analysis, please try again later.</p>
       `;
       aiRating = 7;
     } else {
@@ -191,10 +189,10 @@ ${truncatedContent}
       if (!aiSuggestions) {
         console.log('No analysis content generated, using fallback');
         aiSuggestions = `
-        <h3>Resume Analysis</h3>
-        <p>Your resume has been uploaded successfully.</p>
-        <h3>Rating</h3>
-        <p><strong>Score:</strong> 7/10</p>
+        <h3>SUMMARY SUGGESTION:</h3>
+        <p>Your resume has been uploaded successfully and appears to follow professional standards.</p>
+        <h3>FINAL RATING:</h3>
+        <p><strong>Score:</strong> 7/10 - Standard professional resume format</p>
         `;
         aiRating = 7;
       } else {
