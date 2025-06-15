@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `https://www.visamate.pro/`;
     
     const { error } = await supabase.auth.signUp({
       email,
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signInWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
+    const redirectUrl = `https://www.visamate.pro/dashboard`;
     
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
