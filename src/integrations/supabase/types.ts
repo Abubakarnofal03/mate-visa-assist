@@ -340,6 +340,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      find_user_by_email: {
+        Args: { p_email: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

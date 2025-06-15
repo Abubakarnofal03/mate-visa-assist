@@ -74,20 +74,18 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Check if user exists by looking in the profiles table
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('user_id')
-      .eq('user_id', `(SELECT id FROM auth.users WHERE email = '${email}')`)
-      .single();
+    // Use the new function to safely find user by email
+    const { data: userId, error: userError } = await supabase.rpc('find_user_by_email', { 
+      p_email: email 
+    });
     
-    console.log('User lookup result:', { found: !!profileData, error: profileError });
+    console.log('User lookup result:', { found: !!userId, error: userError });
 
     // For security, always return the same message regardless of whether user exists
     const successMessage = 'If an account with that email exists, a password reset link has been sent.';
 
     // If no user found, still return success to prevent email enumeration
-    if (profileError || !profileData) {
+    if (userError || !userId) {
       return new Response(JSON.stringify({ message: successMessage }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -99,13 +97,13 @@ const handler = async (req: Request): Promise<Response> => {
     const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
 
-    console.log('Generated reset token for user:', profileData.user_id);
+    console.log('Generated reset token for user:', userId);
 
     // Store reset token
     const { error: tokenError } = await supabase
       .from('password_reset_tokens')
       .insert({
-        user_id: profileData.user_id,
+        user_id: userId,
         token_hash: tokenHash,
         expires_at: expiresAt.toISOString(),
         ip_address: clientIP,
