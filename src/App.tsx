@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Documents from "./pages/Documents";
 import VisaProgress from "./pages/VisaProgress";
+import VisaConsultant from "./pages/VisaConsultant";
 import SOP from "./pages/SOP";
 import Resume from "./pages/Resume";
 import Profile from "./pages/Profile";
@@ -125,6 +126,31 @@ const App = () => (
                          </div>
                          <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
                            <VisaProgress />
+                         </div>
+                       </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/visa-consultant" 
+              element={
+                <ProtectedRoute>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                       <main className="flex-1 flex flex-col overflow-hidden">
+                         <div className="flex items-center justify-between p-2 border-b">
+                           <div className="md:hidden">
+                             <SidebarTrigger />
+                           </div>
+                           <div className="ml-auto">
+                             <ThemeToggle />
+                           </div>
+                         </div>
+                         <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-auto">
+                           <VisaConsultant />
                          </div>
                        </main>
                     </div>

@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, Circle, TrendingUp } from 'lucide-react';
+import { CheckCircle, Circle, TrendingUp, Bot } from 'lucide-react';
 
 interface VisaProgressData {
   id: string;
@@ -185,9 +187,17 @@ const VisaProgress = () => {
       {/* Progress Overview */}
       <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
-            Overall Progress
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              Overall Progress
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/visa-consultant">
+                <Bot className="h-4 w-4 mr-2" />
+                Ask Consultant
+              </Link>
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

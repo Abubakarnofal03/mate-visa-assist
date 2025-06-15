@@ -28,7 +28,8 @@ import {
   FileEdit, 
   User, 
   LogOut,
-  Briefcase
+  Briefcase,
+  Bot
 } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -42,6 +43,7 @@ const AppSidebar = () => {
     { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, tutorial: 'dashboard' },
     { path: '/documents', label: 'Documents', icon: FileText, tutorial: 'documents' },
     { path: '/visa-progress', label: 'Visa Progress', icon: Calendar, tutorial: 'visa-progress' },
+    { path: '/visa-consultant', label: 'Visa Consultant', icon: Bot, tutorial: 'visa-consultant' },
     { path: '/sop', label: 'SOPs', icon: FileEdit, tutorial: 'sop' },
     { path: '/resume', label: 'Resume', icon: Briefcase, tutorial: 'resume' },
     { path: '/profile', label: 'Profile', icon: User, tutorial: 'profile' },
